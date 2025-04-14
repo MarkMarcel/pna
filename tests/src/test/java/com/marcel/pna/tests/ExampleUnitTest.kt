@@ -1,4 +1,4 @@
-package com.marcel.pna
+package com.marcel.pna.tests
 
 import org.junit.Test
 

@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "pna"
 include(":app")
 include(":components")
+include(":tests")
