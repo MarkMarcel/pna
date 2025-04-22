@@ -13,4 +13,9 @@ _Inspired by [this design](https://dribbble.com/shots/20391043-News-App)
 Oreo (Android 8.0)
 
 ### Tools Used During Development
-- Android Studio Ladybug
+- Android Studio Meerkat | 2024.3.1 Patch 2
+
+### Module Structure
+- App module
+- Components module - contains the UI components (currently a private repo)
+- Tests module - contains the tests for app module
