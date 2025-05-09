@@ -10,6 +10,7 @@ espresso-core = "3.6.1"
 junit = "4.13.2"
 kotlin = "2.1.20"
 ksp = "2.1.10-1.0.31"
+uiTestJunit4Android = "1.8.0"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activity-compose" }
@@ -23,7 +24,10 @@ compose-material-icons = { group = "androidx.compose.material", name = "material
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-preview-debug = { group = "androidx.compose.ui", name = "ui-tooling" }
+compose-test = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+compose-test-manifest = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-ui-test-junit4-android = { group = "androidx.compose.ui", name = "ui-test-junit4-android", version.ref = "uiTestJunit4Android" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
