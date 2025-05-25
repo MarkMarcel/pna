@@ -1,6 +1,5 @@
 package com.marcel.pna.tests.components
 
-import androidx.compose.runtime.remember
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -9,12 +8,11 @@ import com.marcel.pna.components.headline.CURRENT_HEADLINE_TITLE_TEST_TAG
 import com.marcel.pna.components.headline.HEADLINES_FINISHED_TEST_TAG
 import com.marcel.pna.components.headline.HEADLINE_CARDS_TEST_TAG
 import com.marcel.pna.components.headline.Headlines
-import com.marcel.pna.components.headline.HeadlinesData
 import com.marcel.pna.components.headline.HeadlinesLoadingState
-import com.marcel.pna.components.headline.HeadlinesState
 import com.marcel.pna.components.headline.NEXT_HEADLINE_LOADING_TEST_TAG
 import com.marcel.pna.components.headline.NEXT_HEADLINE_TITLE_TEST_TAG
 import com.marcel.pna.components.headline.headlinesTestData
+import com.marcel.pna.components.headline.rememberHeadlinesState
 import com.marcel.pna.components.kotlinextensions.toTitleCase
 import org.junit.Rule
 import org.junit.Test
@@ -37,12 +35,15 @@ class HeadlinesTest {
     @Test
     fun givenCurrentAndNextHeadlineIndicesNotLastWhenSwipedLeftThenCurrentAndNextHeadlineIndicesIncrementedWithinBounds() {
         composeTestRule.setContent {
-            val headlinesData = HeadlinesData(HeadlinesLoadingState.Loaded, headlinesTestData)
-            val headlinesState = remember { HeadlinesState(headlinesTestData.size) }
+            val headlinesState = rememberHeadlinesState()
             Headlines(
-                headlinesData = headlinesData,
+                headlines = headlinesTestData,
+                loadingState = HeadlinesLoadingState.NotLoading,
                 state = headlinesState,
-                testTags = testTags
+                testTags = testTags,
+                onHeadlineTapped = { _ -> },
+                onSaveHeadline = { _ -> },
+                onOpenHeadlineUrl = { _ -> }
             )
         }
         // Dismiss current headline
@@ -64,15 +65,17 @@ class HeadlinesTest {
 
     @Test
     fun givenCurrentAndNextHeadlineIndicesNotFirstWhenSwipedRightThenCurrentAndNextHeadlineIndicesDecrementedWithinBounds() {
+        val currentIndex = headlinesTestData.lastIndex
         composeTestRule.setContent {
-            val headlinesData = HeadlinesData(HeadlinesLoadingState.Loaded, headlinesTestData)
-            val headlinesState = remember {
-                HeadlinesState(initialDataSize = headlinesTestData.size, startIndex = 1)
-            }
+            val headlinesState = rememberHeadlinesState(currentIndex)
             Headlines(
-                headlinesData = headlinesData,
+                headlines = headlinesTestData,
+                loadingState = HeadlinesLoadingState.NotLoading,
                 state = headlinesState,
-                testTags = testTags
+                testTags = testTags,
+                onHeadlineTapped = { _ -> },
+                onSaveHeadline = { _ -> },
+                onOpenHeadlineUrl = { _ -> }
             )
         }
         composeTestRule.onNodeWithTag(
@@ -83,23 +86,27 @@ class HeadlinesTest {
             CURRENT_HEADLINE_TITLE_TEST_TAG,
             useUnmergedTree = true
         )
-            .assertTextEquals(headlinesTestData[0].title.toTitleCase())
+            .assertTextEquals(headlinesTestData[currentIndex - 1].title.toTitleCase())
         composeTestRule.onNodeWithTag(
             NEXT_HEADLINE_TITLE_TEST_TAG,
             useUnmergedTree = true
         )
-            .assertTextEquals(headlinesTestData[1].title.toTitleCase())
+            .assertTextEquals(headlinesTestData[currentIndex].title.toTitleCase())
     }
 
     @Test
     fun givenCurrentHeadlineIsFirstWhenSwipedRightThenNoAction() {
         composeTestRule.setContent {
-            val headlinesData = HeadlinesData(HeadlinesLoadingState.Loaded, headlinesTestData)
-            val headlinesState = remember { HeadlinesState(headlinesTestData.size) }
+
+            val headlinesState = rememberHeadlinesState()
             Headlines(
-                headlinesData = headlinesData,
+                headlines = headlinesTestData,
+                loadingState = HeadlinesLoadingState.NotLoading,
                 state = headlinesState,
-                testTags = testTags
+                testTags = testTags,
+                onHeadlineTapped = { _ -> },
+                onSaveHeadline = { _ -> },
+                onOpenHeadlineUrl = { _ -> }
             )
         }
         composeTestRule.onNodeWithTag(
