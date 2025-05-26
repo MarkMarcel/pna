@@ -14,7 +14,9 @@ Oreo (Android 8.0)
 
 ### Tools Used During Development
 - Android Studio Meerkat | 2024.3.1 Patch 2
+- Android Gradle Plugin 8.9.2
 - GitHub CLI  2.70.0 (2025-04-11)
+- KSP
 - Vim 9.1.754
 
 ### Module Structure
@@ -23,5 +25,9 @@ Oreo (Android 8.0)
 - Tests module - contains the tests for app module
 
 ### Tech Stack
+- Coil
 - Jetpack Compose
+- JUnit
+- Kotlin
 - Material 3
+- MockK
