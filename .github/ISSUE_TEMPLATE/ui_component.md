@@ -1,3 +1,4 @@
+---
 name: UI Component Implementation 
 about: Standard template for UI component development
 title: '[UI] Implement [Component Name]'
