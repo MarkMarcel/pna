@@ -1,80 +1,72 @@
-package com.marcel.pna.tests.components
+package com.marcel.pna.components.headline
 
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertAny
+import androidx.compose.ui.test.filterToOne
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import com.marcel.pna.components.headline.CURRENT_HEADLINE_LOADING_TEST_TAG
-import com.marcel.pna.components.headline.CURRENT_HEADLINE_OPEN_URL_TEST_TAG
-import com.marcel.pna.components.headline.CURRENT_HEADLINE_SAVE_TEST_TAG
-import com.marcel.pna.components.headline.CURRENT_HEADLINE_TEST_TAG
-import com.marcel.pna.components.headline.CURRENT_HEADLINE_TITLE_TEST_TAG
-import com.marcel.pna.components.headline.HEADLINES_FINISHED_TEST_TAG
-import com.marcel.pna.components.headline.HEADLINE_CARDS_TEST_TAG
-import com.marcel.pna.components.headline.Headlines
-import com.marcel.pna.components.headline.HeadlinesLoadingState
-import com.marcel.pna.components.headline.NEXT_HEADLINE_LOADING_TEST_TAG
-import com.marcel.pna.components.headline.NEXT_HEADLINE_TEST_TAG
-import com.marcel.pna.components.headline.NEXT_HEADLINE_TITLE_TEST_TAG
-import com.marcel.pna.components.headline.headlinesTestData
-import com.marcel.pna.components.headline.rememberHeadlinesState
-import com.marcel.pna.components.kotlinextensions.toTitleCase
+import com.marcel.pna.components.R
+import com.marcel.pna.components.getStringResource
+import com.marcel.pna.components.hasAnyCustomActionLabel
+import com.marcel.pna.components.swipeLeft
+import com.marcel.pna.components.swipeRight
 import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.verifySequence
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
 // Todo: check memory limits and adjust gradle properties for CI/CD
 // Todo: Test when end was but was loading
 class HeadlinesTest {
-    private val testTags = mapOf(
-        CURRENT_HEADLINE_TEST_TAG to CURRENT_HEADLINE_TEST_TAG,
-        CURRENT_HEADLINE_LOADING_TEST_TAG to CURRENT_HEADLINE_LOADING_TEST_TAG,
-        CURRENT_HEADLINE_OPEN_URL_TEST_TAG to CURRENT_HEADLINE_OPEN_URL_TEST_TAG,
-        CURRENT_HEADLINE_SAVE_TEST_TAG to CURRENT_HEADLINE_SAVE_TEST_TAG,
-        CURRENT_HEADLINE_TITLE_TEST_TAG to CURRENT_HEADLINE_TITLE_TEST_TAG,
-        HEADLINE_CARDS_TEST_TAG to HEADLINE_CARDS_TEST_TAG,
-        HEADLINES_FINISHED_TEST_TAG to HEADLINES_FINISHED_TEST_TAG,
-        NEXT_HEADLINE_LOADING_TEST_TAG to NEXT_HEADLINE_LOADING_TEST_TAG,
-        NEXT_HEADLINE_TEST_TAG to NEXT_HEADLINE_TEST_TAG,
-        NEXT_HEADLINE_TITLE_TEST_TAG to NEXT_HEADLINE_TITLE_TEST_TAG
-    )
-
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+
+    lateinit var previousHeadlineActionLabel: String
+
+    @Before
+    fun setStringResources() {
+        previousHeadlineActionLabel = getStringResource(R.string.previous_headline_action_label)
+    }
 
     @Test
     fun givenCurrentAndNextHeadlineIndicesNotFirstWhenSwipedRightThenCurrentAndNextHeadlineIndicesDecrementedWithinBounds() {
         val currentIndex = headlinesTestData.lastIndex
+
         composeTestRule.setContent {
             val headlinesState = rememberHeadlinesState(currentIndex)
             Headlines(
                 headlines = headlinesTestData,
                 loadingState = HeadlinesLoadingState.NotLoading,
                 state = headlinesState,
-                testTags = testTags,
                 onHeadlineTapped = { _ -> },
                 onSaveHeadline = { _ -> },
                 onOpenHeadlineUrl = { _ -> }
             )
         }
-        composeTestRule.onNodeWithTag(
-            HEADLINE_CARDS_TEST_TAG,
-            useUnmergedTree = true
+        composeTestRule
+        composeTestRule.onNode(
+            hasAnyCustomActionLabel(previousHeadlineActionLabel)
         ).swipeRight()
         composeTestRule.onNodeWithTag(
-            CURRENT_HEADLINE_TITLE_TEST_TAG,
+            CURRENT_HEADLINE_TEST_TAG,
             useUnmergedTree = true
         )
-            .assertTextEquals(headlinesTestData[currentIndex - 1].title.toTitleCase())
+            .assertHeadlineDetailsAreCorrect(headlinesTestData[currentIndex - 1])
         composeTestRule.onNodeWithTag(
-            NEXT_HEADLINE_TITLE_TEST_TAG,
+            NEXT_HEADLINE_TEST_TAG,
             useUnmergedTree = true
         )
-            .assertTextEquals(headlinesTestData[currentIndex].title.toTitleCase())
+            .assertHeadlineDetailsAreCorrect(headlinesTestData[currentIndex])
     }
 
     @Test
@@ -85,31 +77,33 @@ class HeadlinesTest {
                 headlines = headlinesTestData,
                 loadingState = HeadlinesLoadingState.NotLoading,
                 state = headlinesState,
-                testTags = testTags,
                 onHeadlineTapped = { _ -> },
                 onSaveHeadline = { _ -> },
                 onOpenHeadlineUrl = { _ -> }
             )
         }
         // Dismiss current headline
-        composeTestRule.onNodeWithTag(
-            HEADLINE_CARDS_TEST_TAG,
-            useUnmergedTree = true
+        composeTestRule.onNode(
+            hasAnyCustomActionLabel(previousHeadlineActionLabel)
         ).swipeLeft()
         composeTestRule.onNodeWithTag(
-            CURRENT_HEADLINE_TITLE_TEST_TAG,
+            CURRENT_HEADLINE_TEST_TAG,
             useUnmergedTree = true
         )
-            .assertTextEquals(headlinesTestData[1].title.toTitleCase())
+            .assertHeadlineDetailsAreCorrect(headlinesTestData[1])
         composeTestRule.onNodeWithTag(
-            NEXT_HEADLINE_TITLE_TEST_TAG,
+            NEXT_HEADLINE_TEST_TAG,
             useUnmergedTree = true
         )
-            .assertTextEquals(headlinesTestData[2].title.toTitleCase())
+            .assertHeadlineDetailsAreCorrect(headlinesTestData[2])
     }
 
     @Test
     fun givenCurrentHeadlineDisplayedWhenActionsInitiatedThenCallbacksCalled() {
+        val openHeadlineContentDescription =
+            getStringResource(R.string.open_headline_url_content_description)
+        val saveHeadlineContentDescription =
+            getStringResource(R.string.save_headline_content_description)
         val onHeadlineTapped = mockk<(Int) -> Unit>(relaxed = true)
         val onSaveHeadline = mockk<(Int) -> Unit>(relaxed = true)
         val onOpenHeadlineUrl = mockk<(Int) -> Unit>(relaxed = true)
@@ -119,49 +113,65 @@ class HeadlinesTest {
                 headlines = headlinesTestData,
                 loadingState = HeadlinesLoadingState.NotLoading,
                 state = headlinesState,
-                testTags = testTags,
                 onHeadlineTapped = onHeadlineTapped,
                 onSaveHeadline = onSaveHeadline,
                 onOpenHeadlineUrl = onOpenHeadlineUrl,
             )
         }
-        composeTestRule.onNodeWithTag(CURRENT_HEADLINE_TEST_TAG).performClick()
-        verify(exactly = 1) { onHeadlineTapped(0) }
-        composeTestRule.onNodeWithTag(CURRENT_HEADLINE_OPEN_URL_TEST_TAG).performClick()
-        verify(exactly = 1) { onOpenHeadlineUrl(0) }
-        composeTestRule.onNodeWithTag(CURRENT_HEADLINE_SAVE_TEST_TAG).performClick()
-        verify(exactly = 1) { onHeadlineTapped(0) }
+        val currentHeadline = composeTestRule.onNodeWithTag(CURRENT_HEADLINE_TEST_TAG)
+        currentHeadline.performClick()
+        currentHeadline.onChildren()
+            .filterToOne(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.ContentDescription,
+                    listOf(saveHeadlineContentDescription)
+                )
+            )
+            .performClick()
+        currentHeadline.onChildren()
+            .filterToOne(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.ContentDescription,
+                    listOf(openHeadlineContentDescription)
+                )
+            )
+            .performClick()
+        verifySequence {
+            onHeadlineTapped(0)
+            onSaveHeadline(0)
+            onOpenHeadlineUrl(0)
+        }
     }
 
     @Test
     fun givenCurrentHeadlineIsFirstWhenSwipedRightThenNoChange() {
         composeTestRule.setContent {
-
             val headlinesState = rememberHeadlinesState()
             Headlines(
                 headlines = headlinesTestData,
                 loadingState = HeadlinesLoadingState.NotLoading,
                 state = headlinesState,
-                testTags = testTags,
                 onHeadlineTapped = { _ -> },
                 onSaveHeadline = { _ -> },
                 onOpenHeadlineUrl = { _ -> }
             )
         }
+        // Verify current headline is first in list
         composeTestRule.onNodeWithTag(
-            HEADLINE_CARDS_TEST_TAG,
-            useUnmergedTree = true
-        ).swipeRight()
-        composeTestRule.onNodeWithTag(
-            CURRENT_HEADLINE_TITLE_TEST_TAG,
+            CURRENT_HEADLINE_TEST_TAG,
             useUnmergedTree = true
         )
-            .assertTextEquals(headlinesTestData[0].title.toTitleCase())
+            .assertHeadlineDetailsAreCorrect(headlinesTestData[0])
+
+        // Perform swipe
+        composeTestRule.onNodeWithTag(CURRENT_HEADLINE_TEST_TAG).swipeRight()
+
+        // Verify there's no change
         composeTestRule.onNodeWithTag(
-            NEXT_HEADLINE_TITLE_TEST_TAG,
+            CURRENT_HEADLINE_TEST_TAG,
             useUnmergedTree = true
         )
-            .assertTextEquals(headlinesTestData[1].title.toTitleCase())
+            .assertHeadlineDetailsAreCorrect(headlinesTestData[0])
     }
 
     @Test
@@ -188,33 +198,31 @@ class HeadlinesTest {
                 headlines = headlines.value,
                 loadingState = loadingState.value,
                 state = headlinesState,
-                testTags = testTags,
                 onHeadlineTapped = { _ -> },
                 onSaveHeadline = { _ -> },
                 onOpenHeadlineUrl = { _ -> }
             )
         }
-        // Verify current headline is last headline in initialHeadlines
-        composeTestRule.onNodeWithTag(
-            CURRENT_HEADLINE_TITLE_TEST_TAG,
+        val currentHeadline = composeTestRule.onNodeWithTag(
+            CURRENT_HEADLINE_TEST_TAG,
             useUnmergedTree = true
         )
-            .assertTextEquals(initialHeadlines[initialHeadlines.lastIndex].title.toTitleCase())
+        // Verify current headline is last headline in initialHeadlines
+        currentHeadline.assertHeadlineDetailsAreCorrect(initialHeadlines[initialHeadlines.lastIndex])
         // Verify next headline is showing loading card
         composeTestRule.onNodeWithTag(NEXT_HEADLINE_LOADING_TEST_TAG)
             .assertExists(errorMessageOnFail = "Next headline loading indicator not displayed")
+
+        // update list
         headlines.update { state -> state + loadingHeadlines }
 
+        // Verify items displayed on screen updated
+        currentHeadline.assertHeadlineDetailsAreCorrect(initialHeadlines[initialHeadlines.lastIndex])
         composeTestRule.onNodeWithTag(
-            CURRENT_HEADLINE_TITLE_TEST_TAG,
+            NEXT_HEADLINE_TEST_TAG,
             useUnmergedTree = true
         )
-            .assertTextEquals(initialHeadlines[initialHeadlines.lastIndex].title.toTitleCase())
-        composeTestRule.onNodeWithTag(
-            NEXT_HEADLINE_TITLE_TEST_TAG,
-            useUnmergedTree = true
-        )
-            .assertTextEquals(loadingHeadlines[0].title.toTitleCase())
+            .assertHeadlineDetailsAreCorrect(loadingHeadlines[0])
     }
 
     @Test
@@ -225,7 +233,6 @@ class HeadlinesTest {
                 headlines = headlinesTestData,
                 loadingState = HeadlinesLoadingState.NotLoading,
                 state = headlinesState,
-                testTags = testTags,
                 onHeadlineTapped = { _ -> },
                 onSaveHeadline = { _ -> },
                 onOpenHeadlineUrl = { _ -> },
@@ -243,9 +250,8 @@ class HeadlinesTest {
         ).assertDoesNotExist()
 
         // Dismiss current headline
-        composeTestRule.onNodeWithTag(
-            HEADLINE_CARDS_TEST_TAG,
-            useUnmergedTree = true
+        composeTestRule.onNode(
+            hasAnyCustomActionLabel(previousHeadlineActionLabel)
         ).swipeLeft()
         // Verify current and next headline don't exist and finished UI exists
         composeTestRule.onNodeWithTag(
@@ -257,5 +263,16 @@ class HeadlinesTest {
         composeTestRule.onNodeWithTag(
             HEADLINES_FINISHED_TEST_TAG,
         ).assertExists(errorMessageOnFail = "Headlines finished UI not displayed")
+    }
+}
+
+private fun SemanticsNodeInteraction.assertHeadlineDetailsAreCorrect(
+    headline: Headline
+) {
+    with(onChildren()) {
+        assertAny(hasText(headline.authorName, ignoreCase = true))
+        assertAny(hasText(headline.source, ignoreCase = true))
+        assertAny(hasText(headline.description, ignoreCase = true))
+        assertAny(hasText(headline.title, ignoreCase = true))
     }
 }
