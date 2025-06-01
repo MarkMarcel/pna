@@ -1,4 +1,4 @@
-package com.marcel.pna.components.app
+package com.marcel.pna
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,23 +10,26 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
+import com.marcel.pna.components.theme.PNAComponentsTheme
 
-class MainActivity : ComponentActivity() {
+class ComponentsDemoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent{
-            Box(
-                Modifier.safeContentPadding()
-            ){
+        setContent {
+            PNAComponentsTheme {
                 Box(
-                    Modifier
-                        .fillMaxSize()
-                        .wrapContentSize()
-                ){
-                    Text("Hello PNA")
-                }
+                    Modifier.Companion.safeContentPadding()
+                ) {
+                    Box(
+                        Modifier.Companion
+                            .fillMaxSize()
+                            .wrapContentSize()
+                    ) {
+                        Text("Hello PNA")
+                    }
 
+                }
             }
         }
     }

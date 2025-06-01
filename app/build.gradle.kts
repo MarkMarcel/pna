@@ -51,7 +51,7 @@ android {
         create("app") {
             dimension = "appType"
         }
-        create("components") {
+        create("componentsdemo") {
             dimension = "appType"
             applicationIdSuffix = ".components"
             versionNameSuffix = "- components"

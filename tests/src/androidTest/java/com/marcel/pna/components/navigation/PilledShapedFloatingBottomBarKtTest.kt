@@ -15,7 +15,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import com.marcel.pna.components.theme.surfaceDark
+import com.marcel.pna.components.theme.primaryContainer
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.verify
@@ -34,7 +34,7 @@ class PilledShapedFloatingBottomBarKtTest {
 
         composeTestRule.setContent {
             PilledShapedFloatingNavBar(
-                backgroundColor = surfaceDark,
+                backgroundColor = primaryContainer,
                 items = items,
                 onItemSelected = { _ -> },
             )
@@ -60,7 +60,7 @@ class PilledShapedFloatingBottomBarKtTest {
 
         composeTestRule.setContent {
             PilledShapedFloatingNavBar(
-                backgroundColor = surfaceDark,
+                backgroundColor = primaryContainer,
                 items = items,
                 onItemSelected = onItemSelected,
             )
@@ -101,7 +101,7 @@ class PilledShapedFloatingBottomBarKtTest {
 
         composeTestRule.setContent {
             PilledShapedFloatingNavBar(
-                backgroundColor = surfaceDark,
+                backgroundColor = primaryContainer,
                 items = items,
                 selectedItemIndex = (numberOfItems - 1),
                 onItemSelected = { _ -> },

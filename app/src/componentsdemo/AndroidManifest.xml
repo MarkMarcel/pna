@@ -3,18 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:name=".PNAMApplication"
-        android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:name=".ComponentsDemoApplication"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.PNAM"
-        tools:targetApi="31" >
+        tools:replace="android:name">
         <activity
-            android:name=".PNAMActivity"
+            android:name=".ComponentsDemoActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
