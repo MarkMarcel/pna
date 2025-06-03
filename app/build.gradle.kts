@@ -35,11 +35,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_20
+        targetCompatibility = JavaVersion.VERSION_20
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "20"
+    }
+    kotlin {
+        jvmToolchain(20) // MockK requires this
     }
     packaging {
         resources {
@@ -60,6 +63,7 @@ android {
 }
 
 dependencies {
+    // APP
     // AndroidX
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
@@ -69,6 +73,30 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.preview)
     debugImplementation(libs.compose.preview.debug)
+    // Database
+    implementation(libs.room)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
+    // Dependency Injection
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.compose)
+    implementation(libs.koin.compose.navigation)
+    // Network
+    implementation(libs.okhttp.logger)
+    implementation(libs.moshi)
+    ksp(libs.moshi.codegen)
+    implementation(libs.moshi.converter)
+    implementation(libs.retrofit)
     // PNA.M Components
     implementation(project(":components"))
+
+    // TESTING
+    // Coroutines
+    testImplementation(libs.corountines.test)
+    // JUnit
+    testImplementation(libs.junit)
+    // Koin
+    testImplementation(libs.koin.test)
+    // MockK
+    testImplementation(libs.mockK)
 }

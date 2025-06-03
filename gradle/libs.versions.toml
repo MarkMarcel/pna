@@ -6,11 +6,17 @@ appcompat = "1.7.0"
 coil = "2.7.0"
 compose = "2025.04.01"
 coreKtx = "1.16.0"
+corountines-test = "1.10.1"
 espresso-core = "3.6.1"
 junit = "4.13.2"
+koin = "4.0.3"
 kotlin = "2.1.20"
-ksp = "2.1.10-1.0.31"
+ksp = "2.1.20-2.0.1"
 mockK = "1.14.2"
+moshi = "1.15.2"
+okhttpLogger = "4.9.3"
+retrofit = "2.12.0"
+room = "2.7.1"
 uiTestJunit4Android = "1.8.0"
 
 [libraries]
@@ -28,8 +34,22 @@ compose-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-preview-debug = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-test = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 compose-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+corountines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "corountines-test" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
+koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
+koin-compose-navigation = { group = "io.insert-koin", name = "koin-androidx-compose-navigation" }
+koin-test = { group = "io.insert-koin", name = "koin-test-junit4" }
+mockK = { group = "io.mockk", name = "mockk", version.ref = "mockK" }
 mockK-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockK" }
+moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
+moshi-codegen = { group = "com.squareup.moshi", name = "moshi-kotlin-codegen", version.ref = "moshi" }
+moshi-converter = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
+okhttp-logger = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttpLogger" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+room = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -37,4 +57,3 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-
