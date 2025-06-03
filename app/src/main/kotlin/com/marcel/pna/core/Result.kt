@@ -37,7 +37,7 @@ sealed class Result<out F, out S> {
          */
         suspend inline fun <S> catching(
             noinline delayMillisProvider: (attempt: Int) -> Long = { 0 },
-            noinline shouldRetryProvider: (attempt: Int, Throwable) -> Boolean,
+            noinline shouldRetryProvider: (attempt: Int, Throwable) -> Boolean = { _, _ -> false },
             crossinline block: suspend () -> S
         ): Result<Throwable, S> {
             var attempt = 1

@@ -73,7 +73,8 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.preview)
     debugImplementation(libs.compose.preview.debug)
-    // Database
+    // Data
+    implementation(libs.datastore.preferences)
     implementation(libs.room)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)

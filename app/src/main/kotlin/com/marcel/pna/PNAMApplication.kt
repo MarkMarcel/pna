@@ -3,6 +3,7 @@ package com.marcel.pna
 import android.app.Application
 import com.marcel.pna.core.CoreModule
 import com.marcel.pna.headlines.HeadlinesModule
+import com.marcel.pna.settings.SettingsModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext.startKoin
@@ -18,6 +19,7 @@ class PNAMApplication: Application() {
                     AppModule,
                     CoreModule,
                     HeadlinesModule,
+                    SettingsModule
                 )
             )
         }

@@ -11,4 +11,7 @@ val AppModule = module {
     single(named(APP_COROUTINES_SCOPE)) {
         CoroutineScope(SupervisorJob())
     }
+    single<() -> AppConfig> {
+        { AppConfig() }
+    }
 }
