@@ -2,8 +2,8 @@ package com.marcel.pna.headlines.trending.countries.data
 
 import com.marcel.pna.core.Logger
 import com.marcel.pna.headlines.trending.countries.domain.Country
-import com.marcel.pna.headlines.trending.countries.domain.toDatabaseModel
-import com.marcel.pna.headlines.trending.countries.domain.toDomain
+import com.marcel.pna.headlines.trending.countries.data.models.toDatabaseModel
+import com.marcel.pna.headlines.trending.countries.data.models.toDomain
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map

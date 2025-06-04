@@ -1,7 +1,8 @@
-package com.marcel.pna.headlines.trending.countries.domain
+package com.marcel.pna.headlines.trending.countries.data.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.marcel.pna.headlines.trending.countries.domain.Country
 
 const val COUNTRY_TABLE_NAME = "countries"
 

@@ -1,10 +1,10 @@
 package com.marcel.pna.headlines.trending.countries
 
-import com.marcel.pna.headlines.trending.countries.data.models.CountryApiResponse
+import com.marcel.pna.headlines.trending.countries.data.models.RestCountryApiResponse
 import com.marcel.pna.headlines.trending.countries.data.models.CountryName
 import com.marcel.pna.headlines.trending.countries.data.models.Translation
 import com.marcel.pna.headlines.trending.countries.domain.Country
-import com.marcel.pna.headlines.trending.countries.domain.CountryDatabaseModel
+import com.marcel.pna.headlines.trending.countries.data.models.CountryDatabaseModel
 
 val countriesTestData = listOf(
     Country(alpha2Code = "MN", englishName = "Mongolia", germanName = "Mongolei"),
@@ -15,7 +15,7 @@ val countriesTestData = listOf(
 )
 
 val countryApiResponsesTestData = listOf(
-    CountryApiResponse(
+    RestCountryApiResponse(
         name = CountryName(
             common = "Mongolia",
             official = "Mongolia",
@@ -30,7 +30,7 @@ val countryApiResponsesTestData = listOf(
             "rus" to Translation(official = "Монголия", common = "Монголия")
         )
     ),
-    CountryApiResponse(
+    RestCountryApiResponse(
         name = CountryName(
             common = "Panama",
             official = "Republic of Panama",
@@ -44,7 +44,7 @@ val countryApiResponsesTestData = listOf(
             "fra" to Translation(official = "République du Panama", common = "Panama")
         )
     ),
-    CountryApiResponse(
+    RestCountryApiResponse(
         name = CountryName(
             common = "Tonga",
             official = "Kingdom of Tonga",
@@ -59,7 +59,7 @@ val countryApiResponsesTestData = listOf(
             "fra" to Translation(official = "Royaume des Tonga", common = "Tonga")
         )
     ),
-    CountryApiResponse(
+    RestCountryApiResponse(
         name = CountryName(
             common = "Comoros",
             official = "Union of the Comoros",
@@ -74,7 +74,7 @@ val countryApiResponsesTestData = listOf(
             "fra" to Translation(official = "Union des Comores", common = "Comores")
         )
     ),
-    CountryApiResponse(
+    RestCountryApiResponse(
         name = CountryName(
             common = "Sweden",
             official = "Kingdom of Sweden",

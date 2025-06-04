@@ -1,6 +1,7 @@
 package com.marcel.pna.core
 
 import androidx.room.Room
+import com.squareup.moshi.Moshi
 import kotlinx.coroutines.Dispatchers
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -36,8 +37,12 @@ val CoreModule = module {
     single(named(IO_DISPATCHER)) {
         Dispatchers.IO
     }
+    // Moshi
+    single<Moshi> {
+        Moshi.Builder().build()
+    }
     // Moshi retrofit converter
     single<MoshiConverterFactory> {
-        MoshiConverterFactory.create()
+        MoshiConverterFactory.create(get())
     }
 }

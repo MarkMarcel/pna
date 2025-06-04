@@ -4,7 +4,7 @@ import com.marcel.pna.headlines.trending.countries.domain.Country
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class CountryApiResponse(
+data class RestCountryApiResponse(
     val name: CountryName,
     val cca2: String,
     val translations: Map<String, Translation>
@@ -23,7 +23,7 @@ data class Translation(
     val common: String
 )
 
-fun CountryApiResponse.toDomain(): Country {
+fun RestCountryApiResponse.toDomain(): Country {
     val englishName = this.name.common
     val germanName = this.translations["deu"]?.common ?: this.name.common
     return Country(

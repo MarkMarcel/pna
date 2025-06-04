@@ -33,7 +33,7 @@ class SettingsLocalDataSource(
     private val logger: Logger
 ) {
     private val defaultSettings = Settings(
-        apiKey = null,
+        apiKey = "",
         countryAlpha2Code = defaultCountryAlpha2Code,
         headlinesSourcesIds = null,
         loadTrendingHeadlinesBy = LoadTrendingHeadlinesBy.Country,
@@ -86,7 +86,7 @@ class SettingsLocalDataSource(
 
     private fun Preferences.toSettings(): Settings {
         return Settings(
-            apiKey = this[API_KEY],
+            apiKey = this[API_KEY] ?: "",
             countryAlpha2Code = this[COUNTRY] ?: defaultCountryAlpha2Code,
             headlinesSourcesIds = this[HEADLINES_SOURCES_IDS],
             loadTrendingHeadlinesBy = LoadTrendingHeadlinesBy.valueOf(

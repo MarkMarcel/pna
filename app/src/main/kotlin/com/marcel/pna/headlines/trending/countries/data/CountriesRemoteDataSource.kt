@@ -21,18 +21,9 @@ class CountriesRemoteDataSource(
         }.mapFailure {
             logger.logError(it)
             when (it) {
-                is HttpException -> {
-                    println("Mark says HttpException $it")
-                    CountryError.Server
-                }
-                is IOException -> {
-                    println("Mark says IOException $it")
-                    CountryError.Network
-                }
-                else -> {
-                    println("Mark says else $it")
-                    CountryError.Server
-                }
+                is HttpException -> CountryError.Server
+                is IOException -> CountryError.Network
+                else -> CountryError.Server
             }
         }
     }

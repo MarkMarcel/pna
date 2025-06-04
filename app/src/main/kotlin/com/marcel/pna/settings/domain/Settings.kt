@@ -1,13 +1,13 @@
 package com.marcel.pna.settings.domain
 
-val defaultCountryAlpha2Code = "gh"
+const val defaultCountryAlpha2Code = "gh"
 
 enum class LoadTrendingHeadlinesBy {
     Country, Sources,
 }
 
 data class Settings(
-    val apiKey: String?,
+    val apiKey: String,
     val countryAlpha2Code: String,
     val headlinesSourcesIds: Set<String>?,
     val headlinesPerRequest: Int,

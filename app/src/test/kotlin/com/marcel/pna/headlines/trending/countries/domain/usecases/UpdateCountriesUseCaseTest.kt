@@ -9,9 +9,9 @@ import com.marcel.pna.headlines.trending.countries.data.CountriesRemoteDataSourc
 import com.marcel.pna.headlines.trending.countries.data.CountriesRoomDao
 import com.marcel.pna.headlines.trending.countries.data.DefaultCountriesRepository
 import com.marcel.pna.headlines.trending.countries.data.RestCountriesApi
-import com.marcel.pna.headlines.trending.countries.data.models.CountryApiResponse
+import com.marcel.pna.headlines.trending.countries.data.models.RestCountryApiResponse
 import com.marcel.pna.headlines.trending.countries.domain.CountriesRepository
-import com.marcel.pna.headlines.trending.countries.domain.CountryDatabaseModel
+import com.marcel.pna.headlines.trending.countries.data.models.CountryDatabaseModel
 import com.marcel.pna.headlines.trending.countries.domain.CountryError
 import com.marcel.pna.testLogger
 import io.mockk.coEvery
@@ -104,7 +104,7 @@ class UpdateCountriesUseCaseTest : KoinTest {
             // Setup error
             val errorBody = "Internal Server Error"
                 .toResponseBody("application/json".toMediaType())
-            val response = Response.error<List<CountryApiResponse>>(500, errorBody)
+            val response = Response.error<List<RestCountryApiResponse>>(500, errorBody)
             val httpError = HttpException(response)
 
             // Mock data apis
