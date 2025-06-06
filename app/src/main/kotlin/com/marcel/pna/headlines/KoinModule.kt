@@ -4,11 +4,11 @@ import com.marcel.pna.core.IO_DISPATCHER
 import com.marcel.pna.core.PNAMDatabase
 import com.marcel.pna.headlines.data.ArticleLocalDataSource
 import com.marcel.pna.headlines.data.DefaultHeadlinesRepository
-import com.marcel.pna.headlines.trending.countries.data.CountriesLocalDataSource
-import com.marcel.pna.headlines.trending.countries.data.CountriesRemoteDataSource
-import com.marcel.pna.headlines.trending.countries.data.DefaultCountriesRepository
-import com.marcel.pna.headlines.trending.countries.data.RestCountriesApi
-import com.marcel.pna.headlines.trending.countries.domain.CountriesRepository
+import com.marcel.pna.countries.data.CountriesLocalDataSource
+import com.marcel.pna.countries.data.CountriesRemoteDataSource
+import com.marcel.pna.countries.data.DefaultCountriesRepository
+import com.marcel.pna.countries.data.RestCountriesApi
+import com.marcel.pna.countries.domain.CountriesRepository
 import com.marcel.pna.headlines.trending.data.TrendingHeadlinesApi
 import com.marcel.pna.headlines.data.HeadlinesRemoteDataSource
 import com.marcel.pna.headlines.domain.HeadlinesRepository

@@ -1,6 +1,6 @@
 package com.marcel.pna.headlines.domain
 
-import com.marcel.pna.settings.domain.LoadTrendingHeadlinesBy
+import com.marcel.pna.usersettings.domain.LoadTrendingHeadlinesBy
 
 sealed class HeadlinesRequest(
     open val page: Int,
@@ -22,8 +22,8 @@ sealed class HeadlinesRequest(
         val isValid: Boolean
             get() {
                 return when (loadTrendingHeadlinesBy) {
-                    LoadTrendingHeadlinesBy.Country -> countryAlpha2Code != null
-                    LoadTrendingHeadlinesBy.Sources -> headlinesSourcesIds != null
+                    is LoadTrendingHeadlinesBy.Country -> !countryAlpha2Code.isNullOrEmpty()
+                    is LoadTrendingHeadlinesBy.Sources -> !headlinesSourcesIds.isNullOrEmpty()
                 }
             }
     }

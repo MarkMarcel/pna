@@ -9,7 +9,7 @@ import com.marcel.pna.headlines.domain.HeadlinesLoadError
 import com.marcel.pna.headlines.domain.HeadlinesPage
 import com.marcel.pna.headlines.domain.HeadlinesRequest
 import com.marcel.pna.headlines.trending.data.TrendingHeadlinesApi
-import com.marcel.pna.settings.domain.LoadTrendingHeadlinesBy
+import com.marcel.pna.usersettings.domain.LoadTrendingHeadlinesBy
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -46,7 +46,7 @@ class HeadlinesRemoteDataSource(
             shouldRetryProvider = { attempt, error -> attempt <= 3 && error is IOException }
         ) {
             when (request.loadTrendingHeadlinesBy) {
-                LoadTrendingHeadlinesBy.Country -> {
+                is LoadTrendingHeadlinesBy.Country -> {
                     val response: NewsApiResponse = api.getTrendingHeadlinesFromCountry(
                         apiKey = apiKey,
                         country = request.countryAlpha2Code ?: "",
@@ -59,7 +59,7 @@ class HeadlinesRemoteDataSource(
                     )
                 }
 
-                else -> {
+                is LoadTrendingHeadlinesBy.Sources -> {
                     HeadlinesPage(headlines = emptyList(), nextPage = null)
                 }
             }
@@ -92,7 +92,7 @@ class HeadlinesRemoteDataSource(
             }
         }
         // Reset previousRequest on failure to allow a new request
-        if(result is Result.Failure){
+        if (result is Result.Failure) {
             mutex.withLock {
                 previousRequest = null
             }

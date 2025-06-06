@@ -25,7 +25,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-// Todo: check memory limits and adjust gradle properties for CI/CD
 // Todo: Test when end was but was loading
 class HeadlinesTest {
     @get:Rule
