@@ -3,6 +3,7 @@ package com.marcel.pna.ui.usersettings
 import com.marcel.pna.countries.domain.Country
 import com.marcel.pna.usersettings.domain.LoadTrendingHeadlinesBy
 import com.marcel.pna.usersettings.domain.UserSettings
+import com.marcel.pna.usersettings.domain.UserSettingsError
 import com.marcel.pna.usersettings.domain.UserSettingsUpdate
 
 enum class LoadTrendingHeadlinesBySelection {
@@ -24,6 +25,7 @@ sealed class UserSettingsScreenUiState {
         val areCountriesUpdating: Boolean,
         val countries: List<Country>,
         val country: Country?,
+        val error: UserSettingsError?,
         val loadTrendingHeadlinesBy: LoadTrendingHeadlinesBySelection,
         val sourcesIds: Set<String>?,
     ) : UserSettingsScreenUiState()
@@ -35,6 +37,7 @@ sealed class UserSettingsScreenModelState {
         val areCountriesUpdating: Boolean = false,
         val countries: List<Country>,
         val country: Country?,
+        val errors: List<UserSettingsError> = emptyList(),
         val loadTrendingHeadlinesBy: LoadTrendingHeadlinesBySelection,
         val sourcesIds: Set<String>?,
     ) : UserSettingsScreenModelState()
@@ -46,6 +49,7 @@ fun UserSettingsScreenModelState.toUiState() = when (this) {
         areCountriesUpdating = areCountriesUpdating,
         countries = countries,
         country = country,
+        error = errors.firstOrNull(),
         loadTrendingHeadlinesBy = loadTrendingHeadlinesBy,
         sourcesIds = sourcesIds
     )

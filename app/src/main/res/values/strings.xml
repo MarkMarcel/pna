@@ -6,4 +6,5 @@
     <string name="headlines_heading">headlines</string>
     <string name="user_settings_screen_title">user settings</string>
     <string name="load_trending_headlines_by_label">load trending headlines by</string>
+    <string name="select_trending_headlines_country_prompt">when you choose to load headlines by country you must select country</string>
 </resources>

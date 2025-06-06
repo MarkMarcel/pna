@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.marcel.pna.R
 import com.marcel.pna.components.Centered
+import com.marcel.pna.components.Prompt
 import com.marcel.pna.components.kotlinextensions.toTitleCase
 import com.marcel.pna.components.theme.baseSpacingDiv2
 import com.marcel.pna.core.capitaliseWithLocal
@@ -48,6 +49,8 @@ import com.marcel.pna.core.getDeviceLanguage
 import com.marcel.pna.countries.domain.Country
 import com.marcel.pna.theme.PNAMTheme
 import com.marcel.pna.theme.baseSpacing
+import com.marcel.pna.theme.baseSpacingDiv4
+import com.marcel.pna.usersettings.domain.UserSettingsError
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -125,6 +128,7 @@ private fun UserSettingsContent(
             HeadlinesSettings(
                 areCountriesUpdating = state.areCountriesUpdating,
                 countries = state.countries,
+                error = state.error,
                 loadTrendingHeadlinesBy = state.loadTrendingHeadlinesBy,
                 selectedCountry = state.country,
                 onSetLoadTrendingHeadlinesBy = onSetLoadTrendingHeadlinesBy,
@@ -137,9 +141,10 @@ private fun UserSettingsContent(
 @Composable
 private fun HeadlinesSettings(
     modifier: Modifier = Modifier,
-    countries: List<Country>,
     areCountriesUpdating: Boolean,
+    countries: List<Country>,
     selectedCountry: Country?,
+    error: UserSettingsError?,
     loadTrendingHeadlinesBy: LoadTrendingHeadlinesBySelection,
     onSetLoadTrendingHeadlinesBy: (LoadTrendingHeadlinesBySelection) -> Unit,
     onSetTrendingHeadlinesCountry: (Country) -> Unit
@@ -157,6 +162,7 @@ private fun HeadlinesSettings(
                 areCountriesUpdating = areCountriesUpdating,
                 countries = countries,
                 selectedCountry = selectedCountry,
+                error = error,
                 onCountrySelected = onSetTrendingHeadlinesCountry
             )
         }
@@ -186,55 +192,64 @@ private fun CountrySelector(
     areCountriesUpdating: Boolean,
     countries: List<Country>,
     selectedCountry: Country?,
+    error: UserSettingsError?,
     onCountrySelected: (country: Country) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val language = getDeviceLanguage()
     val germanLanguageCode = "de"
 
-    Row(modifier = modifier.fillMaxWidth()) {
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded },
-            modifier = Modifier.weight(1f)
-        ) {
-            OutlinedTextField(
-                value = selectedCountry?.run { if (language == germanLanguageCode) germanName else englishName }
-                    ?: "",
-                onValueChange = { },
-                readOnly = true,
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
-                    .menuAnchor(
-                        type = MenuAnchorType.PrimaryNotEditable
-                    )
-                    .fillMaxWidth(),
-                colors = ExposedDropdownMenuDefaults.textFieldColors()
-            )
-
-            ExposedDropdownMenu(
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(modifier = modifier.fillMaxWidth()) {
+            ExposedDropdownMenuBox(
                 expanded = expanded,
-                onDismissRequest = { expanded = false },
+                onExpandedChange = { expanded = !expanded },
+                modifier = Modifier.weight(1f)
             ) {
-                countries.forEach { country ->
-                    DropdownMenuItem(
-                        text = { Text(country.run { if (language == germanLanguageCode) germanName else englishName }) },
-                        onClick = {
-                            onCountrySelected(country)
-                            expanded = false
-                        },
-                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                    )
+                OutlinedTextField(
+                    value = selectedCountry?.run { if (language == germanLanguageCode) germanName else englishName }
+                        ?: "",
+                    onValueChange = { },
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    modifier = Modifier
+                        .menuAnchor(
+                            type = MenuAnchorType.PrimaryNotEditable
+                        )
+                        .fillMaxWidth(),
+                    colors = ExposedDropdownMenuDefaults.textFieldColors()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                ) {
+                    countries.forEach { country ->
+                        DropdownMenuItem(
+                            text = { Text(country.run { if (language == germanLanguageCode) germanName else englishName }) },
+                            onClick = {
+                                onCountrySelected(country)
+                                expanded = false
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                        )
+                    }
                 }
             }
+            AnimatedVisibility(areCountriesUpdating) {
+                Row {
+                    Spacer(modifier = Modifier.width(baseSpacing))
+                    CircularProgressIndicator()
+                }
+            }
+
         }
-        AnimatedVisibility(areCountriesUpdating) {
-            Row {
-                Spacer(modifier = Modifier.width(baseSpacing))
-                CircularProgressIndicator()
+        AnimatedVisibility(error == UserSettingsError.NoCountry) {
+            Spacer(modifier = Modifier.height(baseSpacingDiv4))
+            error?.let {
+                Prompt(message = it.toMessage(), isError = true)
             }
         }
-
     }
 }
 
