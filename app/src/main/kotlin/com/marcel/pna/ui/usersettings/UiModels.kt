@@ -65,7 +65,9 @@ fun UserSettingsScreenModelState.Initialised.toUserSettingsUpdate(): UserSetting
             sourceIds = sourcesIds ?: emptySet()
         )
     }
-    return UserSettingsUpdate()
+    return UserSettingsUpdate(
+        loadTrendingHeadlinesBy = loadTrendingHeadlinesBy
+    )
 }
 
 private fun UserSettingsScreenModelState.Initialised.toScreenModelState(loadedSettings: UserSettings): UserSettingsScreenModelState {

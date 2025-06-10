@@ -37,6 +37,7 @@ import org.koin.test.get
 import org.koin.test.mock.declare
 import retrofit2.HttpException
 import retrofit2.Response
+import java.io.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -100,29 +101,37 @@ class UpdateCountriesUseCaseTest : KoinTest {
     fun `When RestCountriesApi throws error then UpdateCountriesUseCase maps to correct CountryError`() =
         runTest {
             declareTestDispatchers(this)
-            // Setup error
+            // Setup errors
             val errorBody = "Internal Server Error"
                 .toResponseBody("application/json".toMediaType())
             val response = Response.error<List<RestCountryApiResponse>>(500, errorBody)
-            val httpError = HttpException(response)
+            val ioException = IOException("Network issue")
+            val httpException = HttpException(response)
+            val errors = listOf(
+                httpException to CountryError.Server,
+                ioException to CountryError.Network // Must be last due to retries in datasource
+            )
 
-            // Mock data apis
+            // Mock data apis. CountriesApi mocked such that it throws the exceptions in [errors] on
+            // subsequent calls in order
             val restCountriesApiMock = mockk<RestCountriesApi> {
-                coEvery { getCountries() } throws httpError
+                coEvery { getCountries() } throwsMany errors.map { error -> error.first }
             }
             val countriesRoomDaoMock = mockk<CountriesRoomDao>(relaxed = true)
             declare<RestCountriesApi> { restCountriesApiMock }
             declare<CountriesRoomDao> { countriesRoomDaoMock }
 
             val useCase = UpdateCountriesUseCase(get(), get())
-            val result = useCase.invoke()
-            assertTrue { result is Result.Failure }
-            assertEquals(
-                expected = Result.Failure(CountryError.Server),
-                actual = result,
-                message = "Expected error $httpError for exception: ${httpError::class.simpleName}"
-            )
-            coVerify(exactly = 1) { restCountriesApiMock.getCountries() }
+            for ((exception, error) in errors) {
+                val result = useCase.invoke()
+                assertTrue { result is Result.Failure }
+                assertEquals(
+                    expected = Result.Failure(error),
+                    actual = result,
+                    message = "Expected error $error for exception: ${exception::class.simpleName}"
+                )
+                coVerify(atLeast = 1) { restCountriesApiMock.getCountries() }
+            }
             confirmVerified(restCountriesApiMock)
         }
 
