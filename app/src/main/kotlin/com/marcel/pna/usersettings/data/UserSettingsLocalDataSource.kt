@@ -60,35 +60,37 @@ class UserSettingsLocalDataSource(
             }
     }
 
-    private fun MutablePreferences.setValues(update: UserSettingsUpdate) {
-        update.apiKey?.let {
-            this[API_KEY] = it
-        }
-        update.loadTrendingHeadlinesBy?.let {
-            when (it) {
-                is LoadTrendingHeadlinesBy.Country -> {
-                    this[LOAD_TRENDING_HEADLINES_BY] = TRENDING_HEADLINES_COUNTRY.name
-                    this[TRENDING_HEADLINES_COUNTRY] = it.alpha2Code
-                }
+    companion object {
+        fun MutablePreferences.setValues(update: UserSettingsUpdate) {
+            update.apiKey?.let {
+                this[API_KEY] = it
+            }
+            update.loadTrendingHeadlinesBy?.let {
+                when (it) {
+                    is LoadTrendingHeadlinesBy.Country -> {
+                        this[LOAD_TRENDING_HEADLINES_BY] = TRENDING_HEADLINES_COUNTRY.name
+                        this[TRENDING_HEADLINES_COUNTRY] = it.alpha2Code
+                    }
 
-                is LoadTrendingHeadlinesBy.Sources -> {
-                    this[LOAD_TRENDING_HEADLINES_BY] = TRENDING_HEADLINES_SOURCES_IDS.name
-                    this[TRENDING_HEADLINES_SOURCES_IDS] = it.sourceIds
+                    is LoadTrendingHeadlinesBy.Sources -> {
+                        this[LOAD_TRENDING_HEADLINES_BY] = TRENDING_HEADLINES_SOURCES_IDS.name
+                        this[TRENDING_HEADLINES_SOURCES_IDS] = it.sourceIds
+                    }
                 }
             }
-        }
-        update.loadTrendingHeadlinesBy?.let {
-        }
-        update.headlinesPerRequest?.let {
-            this[HEADLINES_PER_REQUEST] = it
-        }
-        update.usesDeveloperApiKeys?.let {
-            this[USES_DEVELOPER_API_KEYS] = it
-        }
+            update.loadTrendingHeadlinesBy?.let {
+            }
+            update.headlinesPerRequest?.let {
+                this[HEADLINES_PER_REQUEST] = it
+            }
+            update.usesDeveloperApiKeys?.let {
+                this[USES_DEVELOPER_API_KEYS] = it
+            }
 
+        }
     }
 
-    private fun Preferences.toSettings(): UserSettings {
+    fun Preferences.toSettings(): UserSettings {
         val loadTrendingHeadlinesBy: LoadTrendingHeadlinesBy =
             this[LOAD_TRENDING_HEADLINES_BY]?.let {
                 when {

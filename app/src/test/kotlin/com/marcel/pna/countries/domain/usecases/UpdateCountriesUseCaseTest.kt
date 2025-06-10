@@ -1,5 +1,8 @@
 package com.marcel.pna.countries.domain.usecases
 
+import com.marcel.pna.TestModule
+import com.marcel.pna.core.BACKGROUND_DISPATCHER
+import com.marcel.pna.core.IO_DISPATCHER
 import com.marcel.pna.core.Result
 import com.marcel.pna.countries.countriesTestData
 import com.marcel.pna.countries.countryApiResponsesTestData
@@ -13,23 +16,20 @@ import com.marcel.pna.countries.data.models.RestCountryApiResponse
 import com.marcel.pna.countries.domain.CountriesRepository
 import com.marcel.pna.countries.domain.CountryError
 import com.marcel.pna.declareTestDispatchers
-import com.marcel.pna.testLogger
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifySequence
 import io.mockk.confirmVerified
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Rule
 import org.junit.Test
-import org.koin.core.logger.Level
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
@@ -43,27 +43,31 @@ import kotlin.test.assertTrue
 
 class UpdateCountriesUseCaseTest : KoinTest {
     @get:Rule
-    val koinTestRule = KoinTestRule.Companion.create {
-        printLogger(level = Level.DEBUG)
+    val koinTestRule = KoinTestRule.create {
+        printLogger()
         modules(
-            module {
-                single { testLogger }
-                single { CountriesLocalDataSource(countriesRoomDao = get(), logger = get()) }
-                single { CountriesRemoteDataSource(api = get(), logger = get()) }
-                single<CountriesRepository> {
-                    DefaultCountriesRepository(
-                        ioDispatcher = get(),
-                        localDataSource = get(),
-                        remoteDataSource = get()
-                    )
+            listOf(
+                TestModule,
+                module {
+                    single { CountriesLocalDataSource(countriesRoomDao = get(), logger = get()) }
+                    single { CountriesRemoteDataSource(api = get(), logger = get()) }
+                    single<CountriesRepository> {
+                        DefaultCountriesRepository(
+                            ioDispatcher = get(named(IO_DISPATCHER)),
+                            localDataSource = get(),
+                            remoteDataSource = get()
+                        )
+                    }
                 }
-            }
+            )
         )
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `When UpdateCountriesUseCase invoked then countries are updated`() = runTest {
+        // Replace coroutine dispatchers
+        declareTestDispatchers(this) // `this` refers to runTest scope
+
         val fakeDB = Channel<List<CountryDatabaseModel>>(capacity = 1)
         // Mock data apis
         val countriesRoomDaoMock = mockk<CountriesRoomDao>(relaxed = true) {
@@ -77,12 +81,11 @@ class UpdateCountriesUseCaseTest : KoinTest {
         }
         declare<CountriesRoomDao> { countriesRoomDaoMock }
         declare<RestCountriesApi> { restCountriesApiMock }
-
-        // Replace coroutine dispatchers
-        declareTestDispatchers(this) // `this` refers to runTest scope
-        val useCase = UpdateCountriesUseCase(get(), get())
+        val useCase = UpdateCountriesUseCase(
+            backgroundDispatcher = get(named(BACKGROUND_DISPATCHER)),
+            countriesRepository = get()
+        )
         useCase.run()
-        runCurrent()
         val countries = get<CountriesRepository>().getCountries().firstOrNull()
         assertEquals(
             expected = countriesTestData,
@@ -93,10 +96,8 @@ class UpdateCountriesUseCaseTest : KoinTest {
             countriesRoomDaoMock.insertCountries(any())
             countriesRoomDaoMock.getCountries()
         }
-
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `When RestCountriesApi throws error then UpdateCountriesUseCase maps to correct CountryError`() =
         runTest {
@@ -121,7 +122,10 @@ class UpdateCountriesUseCaseTest : KoinTest {
             declare<RestCountriesApi> { restCountriesApiMock }
             declare<CountriesRoomDao> { countriesRoomDaoMock }
 
-            val useCase = UpdateCountriesUseCase(get(), get())
+            val useCase = UpdateCountriesUseCase(
+                backgroundDispatcher = get(named(BACKGROUND_DISPATCHER)),
+                countriesRepository = get()
+            )
             for ((exception, error) in errors) {
                 val result = useCase.run()
                 assertTrue { result is Result.Failure }
@@ -134,5 +138,4 @@ class UpdateCountriesUseCaseTest : KoinTest {
             }
             confirmVerified(restCountriesApiMock)
         }
-
 }

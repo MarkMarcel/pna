@@ -22,8 +22,7 @@ internal fun KoinTest.declareTestDispatchers(
     testScope: TestScope
 ) {
     val testDispatcher =
-        StandardTestDispatcher(testScope.testScheduler) // use same scheduler as run test
-    declare<CoroutineDispatcher> { testDispatcher }
-    declare(named(BACKGROUND_DISPATCHER)) { testDispatcher }
-    declare(named(IO_DISPATCHER)) { testDispatcher }
+        StandardTestDispatcher(testScope.testScheduler) // use same scheduler as testScope
+    declare<CoroutineDispatcher>(named(BACKGROUND_DISPATCHER)) { testDispatcher }
+    declare<CoroutineDispatcher>(named(IO_DISPATCHER)) { testDispatcher }
 }
