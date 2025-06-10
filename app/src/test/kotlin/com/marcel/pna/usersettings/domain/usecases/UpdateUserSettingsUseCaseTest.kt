@@ -1,4 +1,4 @@
-package com.marcel.pna.usersettings.domain
+package com.marcel.pna.usersettings.domain.usecases
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -6,29 +6,30 @@ import androidx.datastore.preferences.core.mutablePreferencesOf
 import androidx.datastore.preferences.core.preferencesOf
 import com.marcel.pna.TestModule
 import com.marcel.pna.core.BACKGROUND_DISPATCHER
-import com.marcel.pna.core.IO_DISPATCHER
 import com.marcel.pna.core.Result
 import com.marcel.pna.declareTestDispatchers
 import com.marcel.pna.usersettings.SETTINGS_PREFERENCE_DATA_STORE
-import com.marcel.pna.usersettings.data.DefaultUserSettingsRepository
+import com.marcel.pna.usersettings.UserSettingsTestModule
 import com.marcel.pna.usersettings.data.UserSettingsLocalDataSource
 import com.marcel.pna.usersettings.data.UserSettingsLocalDataSource.Companion.setValues
-import com.marcel.pna.usersettings.domain.usecases.UpdateUserSettingsUseCase
+import com.marcel.pna.usersettings.domain.LoadTrendingHeadlinesBy
+import com.marcel.pna.usersettings.domain.UserSettings
+import com.marcel.pna.usersettings.domain.UserSettingsError
+import com.marcel.pna.usersettings.domain.UserSettingsRepository
+import com.marcel.pna.usersettings.domain.UserSettingsUpdate
+import com.marcel.pna.usersettings.domain.defaultCountryAlpha2Code
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.koin.core.qualifier.named
-import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
 import org.koin.test.get
@@ -38,30 +39,12 @@ import kotlin.test.assertTrue
 
 class UpdateUserSettingsUseCaseTest : KoinTest {
     @get:Rule
-    val koinTestRule = KoinTestRule.create {
+    val koinTestRule = KoinTestRule.Companion.create {
         printLogger()
         modules(
             listOf(
                 TestModule,
-                module {
-                    val dataStore = mockk<DataStore<Preferences>> {
-                        every { data } returns flowOf(preferencesOf())
-                    }
-                    single<DataStore<Preferences>>(named(SETTINGS_PREFERENCE_DATA_STORE)) { dataStore }
-                    single {
-                        UserSettingsLocalDataSource(
-                            appConfigProvider = get(),
-                            settingsDataStore = get(named(SETTINGS_PREFERENCE_DATA_STORE)),
-                            logger = get()
-                        )
-                    }
-                    single<UserSettingsRepository> {
-                        DefaultUserSettingsRepository(
-                            ioDispatcher = get(named(IO_DISPATCHER)),
-                            localDataSource = get()
-                        )
-                    }
-                }
+                UserSettingsTestModule,
             )
         )
     }
@@ -107,7 +90,6 @@ class UpdateUserSettingsUseCaseTest : KoinTest {
             )
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `Given valid LoadTrendingHeadlinesBy update, When run, Then settings are updated`() =
         runTest {
