@@ -81,7 +81,7 @@ class UpdateCountriesUseCaseTest : KoinTest {
         // Replace coroutine dispatchers
         declareTestDispatchers(this) // `this` refers to runTest scope
         val useCase = UpdateCountriesUseCase(get(), get())
-        useCase.invoke()
+        useCase.run()
         runCurrent()
         val countries = get<CountriesRepository>().getCountries().firstOrNull()
         assertEquals(
@@ -123,7 +123,7 @@ class UpdateCountriesUseCaseTest : KoinTest {
 
             val useCase = UpdateCountriesUseCase(get(), get())
             for ((exception, error) in errors) {
-                val result = useCase.invoke()
+                val result = useCase.run()
                 assertTrue { result is Result.Failure }
                 assertEquals(
                     expected = Result.Failure(error),

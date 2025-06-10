@@ -1,15 +1,16 @@
 package com.marcel.pna.ui.usersettings
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -22,9 +23,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,7 +53,6 @@ import com.marcel.pna.countries.domain.Country
 import com.marcel.pna.theme.PNAMTheme
 import com.marcel.pna.theme.baseSpacing
 import com.marcel.pna.theme.baseSpacingDiv4
-import com.marcel.pna.usersettings.domain.UserSettingsError
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -74,7 +76,7 @@ fun UserSettingsScreen(
                     CircularProgressIndicator()
                 }
                 LaunchedEffect(uiState) {
-                    viewModel.onIntent(UserSettingsIntent.LoadSettings)
+                    viewModel.onIntent(UserSettingsIntent.LoadData)
                 }
             }
 
@@ -93,6 +95,9 @@ fun UserSettingsScreen(
                     },
                     onSetTrendingHeadlinesCountry = { country ->
                         viewModel.onIntent(UserSettingsIntent.SetTrendingHeadlinesCountry(country = country))
+                    },
+                    onUpdateCountries = {
+                        viewModel.onIntent(UserSettingsIntent.UpdateCountries)
                     }
                 )
             }
@@ -121,9 +126,13 @@ private fun UserSettingsContent(
     modifier: Modifier = Modifier,
     state: UserSettingsScreenUiState.Initialised,
     onSetLoadTrendingHeadlinesBy: (LoadTrendingHeadlinesBySelection) -> Unit,
-    onSetTrendingHeadlinesCountry: (Country) -> Unit
+    onSetTrendingHeadlinesCountry: (Country) -> Unit,
+    onUpdateCountries: () -> Unit,
 ) {
-    LazyColumn(modifier = modifier) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(vertical = baseSpacing)
+    ) {
         item {
             HeadlinesSettings(
                 areCountriesUpdating = state.areCountriesUpdating,
@@ -132,7 +141,8 @@ private fun UserSettingsContent(
                 loadTrendingHeadlinesBy = state.loadTrendingHeadlinesBy,
                 selectedCountry = state.country,
                 onSetLoadTrendingHeadlinesBy = onSetLoadTrendingHeadlinesBy,
-                onSetTrendingHeadlinesCountry = onSetTrendingHeadlinesCountry
+                onSetTrendingHeadlinesCountry = onSetTrendingHeadlinesCountry,
+                onUpdateCountries = onUpdateCountries
             )
         }
     }
@@ -144,12 +154,17 @@ private fun HeadlinesSettings(
     areCountriesUpdating: Boolean,
     countries: List<Country>,
     selectedCountry: Country?,
-    error: UserSettingsError?,
+    error: UserSettingsScreenError?,
     loadTrendingHeadlinesBy: LoadTrendingHeadlinesBySelection,
     onSetLoadTrendingHeadlinesBy: (LoadTrendingHeadlinesBySelection) -> Unit,
-    onSetTrendingHeadlinesCountry: (Country) -> Unit
+    onSetTrendingHeadlinesCountry: (Country) -> Unit,
+    onUpdateCountries: () -> Unit,
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = baseSpacing)
+    ) {
         SettingsGroupTitle(title = stringResource(R.string.headlines_heading).toTitleCase())
         Spacer(modifier = Modifier.height(baseSpacing))
         LoadTrendingHeadlinesBySelector(
@@ -163,7 +178,8 @@ private fun HeadlinesSettings(
                 countries = countries,
                 selectedCountry = selectedCountry,
                 error = error,
-                onCountrySelected = onSetTrendingHeadlinesCountry
+                onCountrySelected = onSetTrendingHeadlinesCountry,
+                onUpdateCountries = onUpdateCountries,
             )
         }
     }
@@ -174,7 +190,7 @@ private fun SettingsGroupTitle(
     modifier: Modifier = Modifier,
     title: String
 ) {
-    Text(title, style = MaterialTheme.typography.titleSmall, modifier = modifier)
+    Text(title, style = MaterialTheme.typography.titleMedium, modifier = modifier)
 }
 
 @Composable
@@ -192,62 +208,72 @@ private fun CountrySelector(
     areCountriesUpdating: Boolean,
     countries: List<Country>,
     selectedCountry: Country?,
-    error: UserSettingsError?,
+    error: UserSettingsScreenError?,
     onCountrySelected: (country: Country) -> Unit,
+    onUpdateCountries: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val language = getDeviceLanguage()
     val germanLanguageCode = "de"
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(modifier = modifier.fillMaxWidth()) {
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded },
-                modifier = Modifier.weight(1f)
-            ) {
-                OutlinedTextField(
-                    value = selectedCountry?.run { if (language == germanLanguageCode) germanName else englishName }
-                        ?: "",
-                    onValueChange = { },
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    modifier = Modifier
-                        .menuAnchor(
-                            type = MenuAnchorType.PrimaryNotEditable
-                        )
-                        .fillMaxWidth(),
-                    colors = ExposedDropdownMenuDefaults.textFieldColors()
-                )
-
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                ) {
-                    countries.forEach { country ->
-                        DropdownMenuItem(
-                            text = { Text(country.run { if (language == germanLanguageCode) germanName else englishName }) },
-                            onClick = {
-                                onCountrySelected(country)
-                                expanded = false
-                            },
-                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                        )
-                    }
-                }
-            }
-            AnimatedVisibility(areCountriesUpdating) {
-                Row {
-                    Spacer(modifier = Modifier.width(baseSpacing))
-                    CircularProgressIndicator()
-                }
-            }
-
+    val sortedCountries by remember(countries) {
+        derivedStateOf {
+            countries.sortedBy { it.run { if (language == germanLanguageCode) germanName else englishName } }
         }
-        AnimatedVisibility(error == UserSettingsError.NoCountry) {
+    }
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            OutlinedTextField(
+                value = selectedCountry?.run { if (language == germanLanguageCode) germanName else englishName }
+                    ?: "",
+                onValueChange = { },
+                readOnly = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier
+                    .menuAnchor(
+                        type = MenuAnchorType.PrimaryNotEditable
+                    )
+                    .fillMaxWidth(),
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                sortedCountries.forEach { country ->
+                    DropdownMenuItem(
+                        text = { Text(country.run { if (language == germanLanguageCode) germanName else englishName }) },
+                        onClick = {
+                            onCountrySelected(country)
+                            expanded = false
+                        },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                    )
+                }
+            }
+        }
+        AnimatedVisibility(error == UserSettingsScreenError.NoCountry) {
             Spacer(modifier = Modifier.height(baseSpacingDiv4))
             error?.let {
                 Prompt(message = it.toMessage(), isError = true)
+            }
+        }
+        Spacer(modifier = Modifier.height(baseSpacingDiv2))
+        Crossfade(targetState = areCountriesUpdating) { isUpdating ->
+            if (isUpdating) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.onSurface)
+            } else {
+                TextButton(onClick = onUpdateCountries) {
+                    Text(
+                        text = stringResource(R.string.update_countries_label).toTitleCase(),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
     }
@@ -288,10 +314,9 @@ private fun LoadTrendingHeadlinesBySelector(
                         selected = selected,
                         onClick = null // null for accessibility with screen readers
                     )
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = baseSpacing)
+                    SettingLabel(
+                        modifier = Modifier.padding(start = baseSpacing),
+                        label = label
                     )
                 }
             }
@@ -301,8 +326,8 @@ private fun LoadTrendingHeadlinesBySelector(
 
 @Composable
 private fun LoadTrendingHeadlinesBySelection.getLabel() = when (this) {
-    LoadTrendingHeadlinesBySelection.Country -> "country".capitaliseWithLocal()
-    LoadTrendingHeadlinesBySelection.Sources -> "sources".capitaliseWithLocal()
+    LoadTrendingHeadlinesBySelection.Country -> stringResource(R.string.country_label).capitaliseWithLocal()
+    LoadTrendingHeadlinesBySelection.Sources -> stringResource(R.string.sources_label).capitaliseWithLocal()
 }
 
 @Preview

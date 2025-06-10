@@ -67,7 +67,7 @@ class GetCountriesUseCaseTest : KoinTest {
         declareTestDispatchers(this) // `this` refers to runTest scope
 
         val useCase = GetCountriesUseCase(get(), get())
-        val countries = useCase().firstOrNull()
+        val countries = useCase.run().firstOrNull()
         runCurrent()
         assertEquals(
             expected = countryApiResponsesTestData.map { it.toDomain() },

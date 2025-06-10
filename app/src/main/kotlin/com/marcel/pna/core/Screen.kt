@@ -19,7 +19,9 @@ class ScreenScope(
     )
     val isRootDestination: Boolean
         get() {
-            return rootDestinations.contains(navController.currentDestination?.route)
+
+            return (navController.previousBackStackEntry == null)
+                    || rootDestinations.contains(navController.currentDestination?.route)
         }
 
     val navigationIcon: @Composable () -> Unit = {
@@ -38,7 +40,6 @@ class ScreenScope(
     fun goBack() {
         navController.popBackStack()
     }
-
 }
 
 @Composable

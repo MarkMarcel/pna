@@ -10,7 +10,7 @@ class UpdateCountriesUseCase(
     private val backgroundDispatcher: CoroutineDispatcher,
     private val countriesRepository: CountriesRepository,
 ) {
-    suspend fun invoke(): Result<CountryError, Unit> {
+    suspend fun run(): Result<CountryError, Unit> {
         return withContext(backgroundDispatcher) {
             countriesRepository.updateCountries()
         }

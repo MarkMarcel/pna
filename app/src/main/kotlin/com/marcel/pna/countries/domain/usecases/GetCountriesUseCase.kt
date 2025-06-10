@@ -10,7 +10,7 @@ class GetCountriesUseCase(
     private val backgroundDispatcher: CoroutineDispatcher,
     private val countriesRepository: CountriesRepository,
 ) {
-    operator fun invoke(): Flow<List<Country>> {
+    fun run(): Flow<List<Country>> {
         return countriesRepository.getCountries()
             .flowOn(backgroundDispatcher)
     }

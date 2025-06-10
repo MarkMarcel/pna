@@ -10,6 +10,6 @@ class GetUserSettingsUseCase(
     private val backgroundDispatcher: CoroutineDispatcher,
     private val userSettingsRepository: UserSettingsRepository
 ) {
-    operator fun invoke(): Flow<UserSettings> =
+    fun run(): Flow<UserSettings> =
         userSettingsRepository.getSettings().flowOn(backgroundDispatcher)
 }

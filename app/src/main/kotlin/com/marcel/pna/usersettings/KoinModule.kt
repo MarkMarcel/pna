@@ -2,10 +2,12 @@ package com.marcel.pna.usersettings
 
 import android.content.Context
 import androidx.datastore.preferences.preferencesDataStore
+import com.marcel.pna.core.BACKGROUND_DISPATCHER
 import com.marcel.pna.core.IO_DISPATCHER
 import com.marcel.pna.usersettings.data.DefaultUserSettingsRepository
 import com.marcel.pna.usersettings.data.UserSettingsLocalDataSource
 import com.marcel.pna.usersettings.domain.UserSettingsRepository
+import com.marcel.pna.usersettings.domain.usecases.UserSettingsUseCaseProvider
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -30,6 +32,11 @@ val SettingsModule = module {
             ioDispatcher = get(named(IO_DISPATCHER)),
             localDataSource = get()
         )
-
+    }
+    single {
+        UserSettingsUseCaseProvider(
+            backgroundDispatcher = get(named(BACKGROUND_DISPATCHER)),
+            userSettingsRepository = get()
+        )
     }
 }

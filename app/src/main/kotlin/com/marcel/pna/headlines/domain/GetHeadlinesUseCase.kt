@@ -9,7 +9,7 @@ class GetHeadlinesUseCase(
     private val backgroundDispatcher: CoroutineDispatcher,
     private val headlinesRepository: HeadlinesRepository,
 ) {
-    suspend operator fun invoke(request: HeadlinesRequest): Result<HeadlinesLoadError, HeadlinesPage> {
+    suspend fun run(request: HeadlinesRequest): Result<HeadlinesLoadError, HeadlinesPage> {
         return withContext(backgroundDispatcher) {
             headlinesRepository.getHeadlines(request)
         }

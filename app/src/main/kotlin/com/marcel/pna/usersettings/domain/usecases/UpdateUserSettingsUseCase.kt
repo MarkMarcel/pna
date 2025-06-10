@@ -11,7 +11,7 @@ class UpdateUserSettingsUseCase(
     private val backgroundDispatcher: CoroutineDispatcher,
     private val userSettingsRepository: UserSettingsRepository
 ) {
-    suspend fun invoke(userSettingsUpdate: UserSettingsUpdate): Result<UserSettingsError, Unit> {
+    suspend fun run(userSettingsUpdate: UserSettingsUpdate): Result<UserSettingsError, Unit> {
         return withContext(backgroundDispatcher) {
             // Return with error from validation if it exist else continue to update
             userSettingsUpdate.getError()?.let {
