@@ -1,15 +1,18 @@
 package com.marcel.pna.core
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.capitalize
 import java.util.Locale
 
 @Composable
-fun getDeviceLanguage(): String {
+fun rememberDeviceLanguageCode(): String {
     val configuration = LocalConfiguration.current
-    val currentLocale: Locale = configuration.locales[0] // Get the primary locale
-    return currentLocale.language
+    return remember(configuration) {
+        val currentLocale: Locale = configuration.locales[0] // Get the primary locale
+        currentLocale.language
+    }
 }
 
 fun String.capitaliseWithLocal(): String {

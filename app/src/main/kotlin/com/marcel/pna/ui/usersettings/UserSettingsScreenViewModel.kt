@@ -37,7 +37,7 @@ class UserSettingsScreenViewModel(
     fun onIntent(intent: UserSettingsIntent) {
         when (intent) {
             is UserSettingsIntent.LoadData -> {
-                loadData()
+                loadData(languageCode = intent.languageCode)
             }
 
             is UserSettingsIntent.SetLoadTrendingHeadlinesBy -> {
@@ -62,7 +62,7 @@ class UserSettingsScreenViewModel(
         }
     }
 
-    private fun loadData() {
+    private fun loadData(languageCode: String) {
         userSettingsCollectionJob?.cancel()
         userSettingsCollectionJob = viewModelScope.launch {
             combine(
@@ -74,11 +74,11 @@ class UserSettingsScreenViewModel(
                 modelState.update { state ->
                     when (state) {
                         is UserSettingsScreenModelState.Initialised -> state
-                            .copy(countries = countries)
+                            .copy(countries = countries, languageCode = languageCode)
                             .toScreenModelState(loadedSettings = loadedSettings)
 
                         else -> UserSettingsScreenModelState.Initialised()
-                            .copy(countries = countries)
+                            .copy(countries = countries, languageCode = languageCode)
                             .toScreenModelState(loadedSettings = loadedSettings)
                     }
                 }

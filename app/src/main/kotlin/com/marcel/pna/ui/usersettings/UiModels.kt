@@ -6,6 +6,8 @@ import com.marcel.pna.usersettings.domain.LoadTrendingHeadlinesBy
 import com.marcel.pna.usersettings.domain.UserSettings
 import com.marcel.pna.usersettings.domain.UserSettingsError
 
+data class UiCountry(val alpha2Code: String, val name: String)
+
 enum class LoadTrendingHeadlinesBySelection {
     Country, Sources
 }
@@ -15,24 +17,26 @@ enum class UserSettingsScreenError {
 }
 
 sealed class UserSettingsIntent {
-    data object LoadData : UserSettingsIntent()
+    data class LoadData(val languageCode: String) : UserSettingsIntent()
 
     data class SetLoadTrendingHeadlinesBy(
         val selection: LoadTrendingHeadlinesBySelection
     ) : UserSettingsIntent()
 
-    data class SetTrendingHeadlinesCountry(val country: Country) : UserSettingsIntent()
+    data class SetTrendingHeadlinesCountry(val country: UiCountry) : UserSettingsIntent()
 
     data object UpdateCountries : UserSettingsIntent()
 }
 
 sealed class UserSettingsScreenUiState {
     data object NotInitialised : UserSettingsScreenUiState()
+
     data class Initialised(
         val areCountriesUpdating: Boolean,
-        val countries: List<Country>,
-        val country: Country?,
+        val countries: List<UiCountry>,
+        val country: UiCountry?,
         val error: UserSettingsScreenError?,
+        val languageCode: String?,
         val loadTrendingHeadlinesBy: LoadTrendingHeadlinesBySelection,
         val sourcesIds: Set<String>?,
     ) : UserSettingsScreenUiState()
@@ -40,11 +44,13 @@ sealed class UserSettingsScreenUiState {
 
 sealed class UserSettingsScreenModelState {
     data object NotInitialised : UserSettingsScreenModelState()
+
     data class Initialised(
         val areCountriesUpdating: Boolean = false,
         val countries: List<Country> = emptyList(),
         val country: Country? = null,
         val errors: List<UserSettingsScreenError> = emptyList(),
+        val languageCode: String = "",
         val loadTrendingHeadlinesBy: LoadTrendingHeadlinesBySelection = LoadTrendingHeadlinesBySelection.Country,
         val sourcesIds: Set<String>? = null,
     ) : UserSettingsScreenModelState()
@@ -63,11 +69,13 @@ fun UserSettingsError.toUserSettingsScreenError() = when (this) {
 
 fun UserSettingsScreenModelState.toUiState() = when (this) {
     is UserSettingsScreenModelState.NotInitialised -> UserSettingsScreenUiState.NotInitialised
+
     is UserSettingsScreenModelState.Initialised -> UserSettingsScreenUiState.Initialised(
         areCountriesUpdating = areCountriesUpdating,
-        countries = countries,
-        country = country,
+        countries = countries.map { it.toUi(languageCode) }.sortedBy { it.name },
+        country = country?.toUi(languageCode),
         error = errors.firstOrNull(),
+        languageCode = languageCode,
         loadTrendingHeadlinesBy = loadTrendingHeadlinesBy,
         sourcesIds = sourcesIds
     )
@@ -93,3 +101,8 @@ fun UserSettingsScreenModelState.Initialised.toScreenModelState(loadedSettings: 
         sourcesIds = sourcesIds
     )
 }
+
+private fun Country.toUi(languageCode: String) = UiCountry(
+    alpha2Code = alpha2Code,
+    name = if (languageCode.lowercase() == "de") germanName else englishName
+)

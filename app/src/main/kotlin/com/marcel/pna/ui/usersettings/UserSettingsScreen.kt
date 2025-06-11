@@ -27,7 +27,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,8 +47,7 @@ import com.marcel.pna.components.Prompt
 import com.marcel.pna.components.kotlinextensions.toTitleCase
 import com.marcel.pna.components.theme.baseSpacingDiv2
 import com.marcel.pna.core.capitaliseWithLocal
-import com.marcel.pna.core.getDeviceLanguage
-import com.marcel.pna.countries.domain.Country
+import com.marcel.pna.core.rememberDeviceLanguageCode
 import com.marcel.pna.theme.PNAMTheme
 import com.marcel.pna.theme.baseSpacing
 import com.marcel.pna.theme.baseSpacingDiv4
@@ -62,6 +60,7 @@ fun UserSettingsScreen(
     viewModel: UserSettingsScreenViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val languageCode = rememberDeviceLanguageCode()
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -75,15 +74,14 @@ fun UserSettingsScreen(
                 Centered(modifier = Modifier.fillMaxSize()) {
                     CircularProgressIndicator()
                 }
-                LaunchedEffect(uiState) {
-                    viewModel.onIntent(UserSettingsIntent.LoadData)
+                LaunchedEffect(languageCode) {
+                    viewModel.onIntent(UserSettingsIntent.LoadData(languageCode = languageCode))
                 }
             }
 
             is UserSettingsScreenUiState.Initialised -> {
                 UserSettingsContent(
                     modifier = Modifier
-                        .fillMaxSize()
                         .padding(top = contentPadding.calculateTopPadding()),
                     state = uiState as UserSettingsScreenUiState.Initialised,
                     onSetLoadTrendingHeadlinesBy = { loadTrendingHeadlinesBy ->
@@ -126,7 +124,7 @@ private fun UserSettingsContent(
     modifier: Modifier = Modifier,
     state: UserSettingsScreenUiState.Initialised,
     onSetLoadTrendingHeadlinesBy: (LoadTrendingHeadlinesBySelection) -> Unit,
-    onSetTrendingHeadlinesCountry: (Country) -> Unit,
+    onSetTrendingHeadlinesCountry: (UiCountry) -> Unit,
     onUpdateCountries: () -> Unit,
 ) {
     LazyColumn(
@@ -152,23 +150,21 @@ private fun UserSettingsContent(
 private fun HeadlinesSettings(
     modifier: Modifier = Modifier,
     areCountriesUpdating: Boolean,
-    countries: List<Country>,
-    selectedCountry: Country?,
+    countries: List<UiCountry>,
+    selectedCountry: UiCountry?,
     error: UserSettingsScreenError?,
     loadTrendingHeadlinesBy: LoadTrendingHeadlinesBySelection,
     onSetLoadTrendingHeadlinesBy: (LoadTrendingHeadlinesBySelection) -> Unit,
-    onSetTrendingHeadlinesCountry: (Country) -> Unit,
+    onSetTrendingHeadlinesCountry: (UiCountry) -> Unit,
     onUpdateCountries: () -> Unit,
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
             .padding(horizontal = baseSpacing)
     ) {
         SettingsGroupTitle(title = stringResource(R.string.headlines_heading).toTitleCase())
         Spacer(modifier = Modifier.height(baseSpacing))
         LoadTrendingHeadlinesBySelector(
-            modifier = Modifier.fillMaxWidth(),
             loadTrendingHeadlinesBy = loadTrendingHeadlinesBy,
             onOptionSelected = onSetLoadTrendingHeadlinesBy
         )
@@ -206,31 +202,21 @@ private fun SettingLabel(
 private fun CountrySelector(
     modifier: Modifier = Modifier,
     areCountriesUpdating: Boolean,
-    countries: List<Country>,
-    selectedCountry: Country?,
+    countries: List<UiCountry>,
+    selectedCountry: UiCountry?,
     error: UserSettingsScreenError?,
-    onCountrySelected: (country: Country) -> Unit,
+    onCountrySelected: (country: UiCountry) -> Unit,
     onUpdateCountries: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val language = getDeviceLanguage()
-    val germanLanguageCode = "de"
 
-    val sortedCountries by remember(countries) {
-        derivedStateOf {
-            countries.sortedBy { it.run { if (language == germanLanguageCode) germanName else englishName } }
-        }
-    }
-
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(modifier = modifier) {
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
-            modifier = Modifier.fillMaxWidth()
         ) {
             OutlinedTextField(
-                value = selectedCountry?.run { if (language == germanLanguageCode) germanName else englishName }
-                    ?: "",
+                value = selectedCountry?.name ?: "",
                 onValueChange = { },
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -245,9 +231,9 @@ private fun CountrySelector(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
             ) {
-                sortedCountries.forEach { country ->
+                countries.forEach { country ->
                     DropdownMenuItem(
-                        text = { Text(country.run { if (language == germanLanguageCode) germanName else englishName }) },
+                        text = { Text(country.name) },
                         onClick = {
                             onCountrySelected(country)
                             expanded = false
@@ -286,14 +272,12 @@ private fun LoadTrendingHeadlinesBySelector(
     onOptionSelected: (LoadTrendingHeadlinesBySelection) -> Unit
 ) {
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(modifier = modifier) {
         SettingLabel(
             label = stringResource(R.string.load_trending_headlines_by_label).capitaliseWithLocal()
         )
         Spacer(modifier = Modifier.height(baseSpacingDiv2))
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Column {
             LoadTrendingHeadlinesBySelection.entries.forEach { option ->
                 val label = option.getLabel()
                 val selected = (option == loadTrendingHeadlinesBy)

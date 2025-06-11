@@ -18,13 +18,6 @@ val scrim = Color(0xFF000000)
 val inverseSurface = Color(0xFF313030)
 val inverseOnSurface = Color(0xFFF4F0EF)
 val inversePrimary = Color(0xFFC6C6C6)
-val surfaceDim = Color(0xFFDDD9D8)
-val surfaceBright = Color(0xFFFDF8F8)
-val surfaceContainerLowest = Color(0xFFFFFFFF)
-val surfaceContainerLow = Color(0xFFF7F3F2)
-val surfaceContainer = Color(0xFFF1EDEC)
-val surfaceContainerHigh = Color(0xFFEBE7E6)
-val surfaceContainerHighest = Color(0xFFE5E2E1)
 
 
 
