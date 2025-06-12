@@ -1,10 +1,10 @@
 package com.marcel.pna.usersettings.domain
 
 data class UserSettingsUpdate(
-    val apiKey: String? = null,
     val headlinesPerRequest: Int? = null,
     val loadTrendingHeadlinesBy: LoadTrendingHeadlinesBy? = null,
-    val usesDeveloperApiKeys: Boolean? = null,
+    val newsApiKey: String? = null,
+    val usesDeveloperNewsApiKeys: Boolean? = null,
 ) {
     fun getError(): UserSettingsError? {
         when (loadTrendingHeadlinesBy) {

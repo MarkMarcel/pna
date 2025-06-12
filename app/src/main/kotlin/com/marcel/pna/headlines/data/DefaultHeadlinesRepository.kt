@@ -17,7 +17,7 @@ class DefaultHeadlinesRepository(
 ) : HeadlinesRepository {
     override suspend fun getHeadlines(request: HeadlinesRequest): Result<HeadlinesLoadError, HeadlinesPage> {
         return withContext(ioDispatcher) {
-            val apiKey = userSettingsRepository.getSettings().first().apiKey
+            val apiKey = userSettingsRepository.getSettings().first().newsApiKey
             when (request) {
                 is HeadlinesRequest.Category -> Result.Success(HeadlinesPage(emptyList(), null))
                 is HeadlinesRequest.Trending -> remoteDataSource.getTrendingHeadlines(

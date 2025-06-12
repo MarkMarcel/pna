@@ -3,10 +3,10 @@ package com.marcel.pna.usersettings.domain
 const val defaultCountryAlpha2Code = "gh"
 
 data class UserSettings(
-    val apiKey: String,
     val headlinesPerRequest: Int,
     val loadTrendingHeadlinesBy: LoadTrendingHeadlinesBy,
-    val usesDeveloperApiKeys: Boolean,
+    val newsApiKey: String,
+    val usesDeveloperNewsApiKeys: Boolean,
 )
 
 sealed class LoadTrendingHeadlinesBy {

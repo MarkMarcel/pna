@@ -20,12 +20,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
-private val API_KEY = stringPreferencesKey("api-key")
 private val HEADLINES_PER_REQUEST = intPreferencesKey("headlines-per-request")
 private val LOAD_TRENDING_HEADLINES_BY = stringPreferencesKey("load-trending-headlines-by")
+private val NEWS_API_KEY = stringPreferencesKey("news-api-key")
 private val TRENDING_HEADLINES_SOURCES_IDS = stringSetPreferencesKey("headlines-sources-ids")
 private val TRENDING_HEADLINES_COUNTRY = stringPreferencesKey("country")
-private val USES_DEVELOPER_API_KEYS = booleanPreferencesKey("uses-developer-api-keys")
+private val USES_DEVELOPER_NEWS_API_KEYS = booleanPreferencesKey("uses-developer-news-api-keys")
 
 class UserSettingsLocalDataSource(
     private val appConfigProvider: () -> AppConfig,
@@ -33,10 +33,10 @@ class UserSettingsLocalDataSource(
     private val logger: Logger
 ) {
     private val defaultUserSettings = UserSettings(
-        apiKey = "",
         loadTrendingHeadlinesBy = LoadTrendingHeadlinesBy.Country(alpha2Code = defaultCountryAlpha2Code),
         headlinesPerRequest = appConfigProvider().headlinesConfig.headlinesPerRequest,
-        usesDeveloperApiKeys = true
+        newsApiKey = "",
+        usesDeveloperNewsApiKeys = true
     )
 
     fun getSettings(): Flow<UserSettings> {
@@ -62,8 +62,8 @@ class UserSettingsLocalDataSource(
 
     companion object {
         fun MutablePreferences.setValues(update: UserSettingsUpdate) {
-            update.apiKey?.let {
-                this[API_KEY] = it
+            update.newsApiKey?.let {
+                this[NEWS_API_KEY] = it
             }
             update.loadTrendingHeadlinesBy?.let {
                 when (it) {
@@ -83,8 +83,8 @@ class UserSettingsLocalDataSource(
             update.headlinesPerRequest?.let {
                 this[HEADLINES_PER_REQUEST] = it
             }
-            update.usesDeveloperApiKeys?.let {
-                this[USES_DEVELOPER_API_KEYS] = it
+            update.usesDeveloperNewsApiKeys?.let {
+                this[USES_DEVELOPER_NEWS_API_KEYS] = it
             }
 
         }
@@ -108,11 +108,11 @@ class UserSettingsLocalDataSource(
                 }
             } ?: defaultUserSettings.loadTrendingHeadlinesBy
         return UserSettings(
-            apiKey = this[API_KEY] ?: "",
             loadTrendingHeadlinesBy = loadTrendingHeadlinesBy,
             headlinesPerRequest = this[HEADLINES_PER_REQUEST]
                 ?: (appConfigProvider().headlinesConfig.headlinesPerRequest),
-            usesDeveloperApiKeys = this[USES_DEVELOPER_API_KEYS] == true
+            newsApiKey = this[NEWS_API_KEY] ?: "",
+            usesDeveloperNewsApiKeys = this[USES_DEVELOPER_NEWS_API_KEYS] == true
         )
     }
 }
