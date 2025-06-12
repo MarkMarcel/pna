@@ -83,6 +83,9 @@ class UserSettingsLocalDataSource(
             update.headlinesPerRequest?.let {
                 this[HEADLINES_PER_REQUEST] = it
             }
+            update.newsApiKey?.let {
+                this[NEWS_API_KEY] = it
+            }
             update.usesDeveloperNewsApiKeys?.let {
                 this[USES_DEVELOPER_NEWS_API_KEYS] = it
             }

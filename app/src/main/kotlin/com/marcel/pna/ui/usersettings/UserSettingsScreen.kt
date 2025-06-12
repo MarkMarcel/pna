@@ -17,6 +17,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
@@ -30,14 +32,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,6 +57,7 @@ import com.marcel.pna.core.rememberDeviceLanguageCode
 import com.marcel.pna.theme.PNAMTheme
 import com.marcel.pna.theme.baseSpacing
 import com.marcel.pna.theme.baseSpacingDiv4
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -74,7 +81,7 @@ fun UserSettingsScreen(
                 Centered(modifier = Modifier.fillMaxSize()) {
                     CircularProgressIndicator()
                 }
-                LaunchedEffect(languageCode) {
+                LaunchedEffect(Unit) {
                     viewModel.onIntent(UserSettingsIntent.LoadData(languageCode = languageCode))
                 }
             }
@@ -84,11 +91,24 @@ fun UserSettingsScreen(
                     modifier = Modifier
                         .padding(top = contentPadding.calculateTopPadding()),
                     state = uiState as UserSettingsScreenUiState.Initialised,
+                    onErrorHandled = {
+                        viewModel.onIntent(UserSettingsIntent.ErrorHandled)
+                    },
+                    onNewsApiKeyChanged = { updatedApiKey ->
+                        viewModel.onIntent(
+                            UserSettingsIntent.UpdateNewsApiKey(updatedApiKey = updatedApiKey)
+                        )
+                    },
                     onSetLoadTrendingHeadlinesBy = { loadTrendingHeadlinesBy ->
                         viewModel.onIntent(
                             UserSettingsIntent.SetLoadTrendingHeadlinesBy(
                                 loadTrendingHeadlinesBy
                             )
+                        )
+                    },
+                    onSetNewsApiKey = { apiKey ->
+                        viewModel.onIntent(
+                            UserSettingsIntent.SetNewsApiKey(apiKey = apiKey)
                         )
                     },
                     onSetTrendingHeadlinesCountry = { country ->
@@ -98,6 +118,9 @@ fun UserSettingsScreen(
                         viewModel.onIntent(UserSettingsIntent.UpdateCountries)
                     }
                 )
+                LaunchedEffect(languageCode) {
+                    viewModel.onIntent(UserSettingsIntent.SetLanguageCode(languageCode = languageCode))
+                }
             }
         }
     }
@@ -123,6 +146,9 @@ private fun UserSettingsTopBar(
 private fun UserSettingsContent(
     modifier: Modifier = Modifier,
     state: UserSettingsScreenUiState.Initialised,
+    onErrorHandled: () -> Unit,
+    onNewsApiKeyChanged: (String) -> Unit,
+    onSetNewsApiKey: (String) -> Unit,
     onSetLoadTrendingHeadlinesBy: (LoadTrendingHeadlinesBySelection) -> Unit,
     onSetTrendingHeadlinesCountry: (UiCountry) -> Unit,
     onUpdateCountries: () -> Unit,
@@ -138,9 +164,18 @@ private fun UserSettingsContent(
                 error = state.error,
                 loadTrendingHeadlinesBy = state.loadTrendingHeadlinesBy,
                 selectedCountry = state.country,
+                onErrorHandled = onErrorHandled,
                 onSetLoadTrendingHeadlinesBy = onSetLoadTrendingHeadlinesBy,
                 onSetTrendingHeadlinesCountry = onSetTrendingHeadlinesCountry,
                 onUpdateCountries = onUpdateCountries
+            )
+        }
+        item {
+            NewsApiServiceSettings(
+                isSettingNewsApiKey = state.isSettingNewsApiKey,
+                newsApiKey = state.newsApiKey,
+                onNewsApiKeyChanged = onNewsApiKeyChanged,
+                onSaveNewsApiKey = onSetNewsApiKey
             )
         }
     }
@@ -154,13 +189,18 @@ private fun HeadlinesSettings(
     selectedCountry: UiCountry?,
     error: UserSettingsScreenError?,
     loadTrendingHeadlinesBy: LoadTrendingHeadlinesBySelection,
+    onErrorHandled: () -> Unit,
     onSetLoadTrendingHeadlinesBy: (LoadTrendingHeadlinesBySelection) -> Unit,
     onSetTrendingHeadlinesCountry: (UiCountry) -> Unit,
     onUpdateCountries: () -> Unit,
 ) {
     Column(
         modifier = modifier
-            .padding(horizontal = baseSpacing)
+            .padding(
+                bottom = baseSpacing,
+                start = baseSpacing,
+                end = baseSpacing
+            )
     ) {
         SettingsGroupTitle(title = stringResource(R.string.headlines_heading).toTitleCase())
         Spacer(modifier = Modifier.height(baseSpacing))
@@ -175,9 +215,37 @@ private fun HeadlinesSettings(
                 selectedCountry = selectedCountry,
                 error = error,
                 onCountrySelected = onSetTrendingHeadlinesCountry,
+                onErrorHandled = onErrorHandled,
                 onUpdateCountries = onUpdateCountries,
             )
         }
+    }
+}
+
+@Composable
+private fun NewsApiServiceSettings(
+    modifier: Modifier = Modifier,
+    isSettingNewsApiKey: Boolean,
+    newsApiKey: String,
+    onNewsApiKeyChanged: (String) -> Unit,
+    onSaveNewsApiKey: (String) -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .padding(
+                bottom = baseSpacing,
+                start = baseSpacing,
+                end = baseSpacing
+            )
+    ) {
+        SettingsGroupTitle(title = stringResource(R.string.news_api_service))
+        Spacer(modifier = Modifier.height(baseSpacing))
+        NewsApiKey(
+            newsApiKey = newsApiKey,
+            onNewsApiKeyChanged = onNewsApiKeyChanged,
+            isSettingNewsApiKey = isSettingNewsApiKey,
+            onSaveNewsApiKey = onSaveNewsApiKey
+        )
     }
 }
 
@@ -187,6 +255,54 @@ private fun SettingsGroupTitle(
     title: String
 ) {
     Text(title, style = MaterialTheme.typography.titleMedium, modifier = modifier)
+}
+
+@Composable
+private fun SettingActionButton(
+    modifier: Modifier = Modifier,
+    isTakingAction: Boolean,
+    label: String,
+    onAction: () -> Unit,
+) {
+    Crossfade(
+        modifier = modifier,
+        targetState = isTakingAction
+    ) { isTakingAction ->
+        if (isTakingAction) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.onSurface)
+        } else {
+            TextButton(
+                onClick = onAction
+            ) {
+                Text(
+                    text = label,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsError(
+    modifier: Modifier = Modifier,
+    error: UserSettingsScreenError?,
+    isVisible: Boolean,
+    onErrorHandled: () -> Unit
+) {
+    AnimatedVisibility(
+        isVisible,
+        modifier = modifier
+    ) {
+        Spacer(modifier = Modifier.height(baseSpacingDiv4))
+        error?.let {
+            Prompt(message = it.toMessage(), isError = true)
+            LaunchedEffect(Unit) {
+                delay(timeMillis = 5000)
+                onErrorHandled()
+            }
+        }
+    }
 }
 
 @Composable
@@ -206,6 +322,7 @@ private fun CountrySelector(
     selectedCountry: UiCountry?,
     error: UserSettingsScreenError?,
     onCountrySelected: (country: UiCountry) -> Unit,
+    onErrorHandled: () -> Unit,
     onUpdateCountries: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -243,25 +360,22 @@ private fun CountrySelector(
                 }
             }
         }
-        AnimatedVisibility(error == UserSettingsScreenError.NoCountry) {
-            Spacer(modifier = Modifier.height(baseSpacingDiv4))
-            error?.let {
-                Prompt(message = it.toMessage(), isError = true)
-            }
-        }
+        SettingsError(
+            error = error,
+            isVisible = (error == UserSettingsScreenError.NoCountry),
+            onErrorHandled = onErrorHandled
+        )
         Spacer(modifier = Modifier.height(baseSpacingDiv2))
-        Crossfade(targetState = areCountriesUpdating) { isUpdating ->
-            if (isUpdating) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.onSurface)
-            } else {
-                TextButton(onClick = onUpdateCountries) {
-                    Text(
-                        text = stringResource(R.string.update_countries_label).toTitleCase(),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-        }
+        SettingActionButton(
+            isTakingAction = areCountriesUpdating,
+            label = stringResource(R.string.update_countries_label).capitaliseWithLocal(),
+            onAction = onUpdateCountries
+        )
+        SettingsError(
+            error = error,
+            isVisible = (error == UserSettingsScreenError.NetWork),
+            onErrorHandled = onErrorHandled
+        )
     }
 }
 
@@ -271,7 +385,6 @@ private fun LoadTrendingHeadlinesBySelector(
     loadTrendingHeadlinesBy: LoadTrendingHeadlinesBySelection,
     onOptionSelected: (LoadTrendingHeadlinesBySelection) -> Unit
 ) {
-
     Column(modifier = modifier) {
         SettingLabel(
             label = stringResource(R.string.load_trending_headlines_by_label).capitaliseWithLocal()
@@ -309,6 +422,77 @@ private fun LoadTrendingHeadlinesBySelector(
 }
 
 @Composable
+private fun NewsApiKey(
+    modifier: Modifier = Modifier,
+    isSettingNewsApiKey: Boolean,
+    newsApiKey: String,
+    onNewsApiKeyChanged: (String) -> Unit,
+    onSaveNewsApiKey: (String) -> Unit
+) {
+    Column(
+        modifier = modifier
+    ) {
+        var hasInteraction by rememberSaveable { mutableStateOf(false) }
+        var isShowKey by rememberSaveable { mutableStateOf(true) }
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = newsApiKey,
+            onValueChange = { value ->
+                onNewsApiKeyChanged(value)
+                hasInteraction = true
+            },
+            placeholder = {
+                SettingLabel(
+                    label = stringResource(
+                        R.string.enter_your_api_key_prompt,
+                        stringResource(R.string.news_api_service)
+                    )
+                        .capitaliseWithLocal()
+                )
+            },
+            visualTransformation = if (isShowKey) PasswordVisualTransformation()
+            else
+                VisualTransformation.None,
+            trailingIcon = {
+                IconButton(
+                    onClick = { isShowKey = !isShowKey }
+                ) {
+                    if (isShowKey) {
+                        Icon(
+                            painter = painterResource(R.drawable.outline_visibility_24),
+                            contentDescription = stringResource(
+                                R.string.show_news_api_key_content_description,
+                                stringResource(R.string.news_api_service)
+                            )
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(R.drawable.outline_visibility_off_24),
+                            contentDescription = stringResource(
+                                R.string.hide_news_api_key_content_description,
+                                stringResource(R.string.news_api_service)
+                            )
+                        )
+                    }
+                }
+            }
+        )
+        Spacer(modifier = Modifier.height(baseSpacingDiv2))
+        AnimatedVisibility(newsApiKey.isNotBlank() && hasInteraction) {
+            SettingActionButton(
+                isTakingAction = isSettingNewsApiKey,
+                label = stringResource(R.string.save_key_label).capitaliseWithLocal(),
+                onAction = {
+                    onSaveNewsApiKey(newsApiKey)
+                    hasInteraction = false
+                }
+            )
+        }
+
+    }
+}
+
+@Composable
 private fun LoadTrendingHeadlinesBySelection.getLabel() = when (this) {
     LoadTrendingHeadlinesBySelection.Country -> stringResource(R.string.country_label).capitaliseWithLocal()
     LoadTrendingHeadlinesBySelection.Sources -> stringResource(R.string.sources_label).capitaliseWithLocal()
@@ -316,10 +500,26 @@ private fun LoadTrendingHeadlinesBySelection.getLabel() = when (this) {
 
 @Preview
 @Composable
-fun UserSettingsScreenPreview() {
+fun UserSettingsScreenInitialisedPreview() {
     PNAMTheme {
-        UserSettingsScreen(
-            navigationIcon = {}
+        UserSettingsContent(
+            state = UserSettingsScreenUiState.Initialised(
+                areCountriesUpdating = false,
+                countries = emptyList(),
+                country = null,
+                error = null,
+                isSettingNewsApiKey = false,
+                languageCode = null,
+                loadTrendingHeadlinesBy = LoadTrendingHeadlinesBySelection.Country,
+                newsApiKey = "",
+                sourcesIds = emptySet()
+            ),
+            onErrorHandled = {},
+            onNewsApiKeyChanged = { _ -> },
+            onSetNewsApiKey = {},
+            onSetLoadTrendingHeadlinesBy = { _ -> },
+            onSetTrendingHeadlinesCountry = { _ -> },
+            onUpdateCountries = {}
         )
     }
 }

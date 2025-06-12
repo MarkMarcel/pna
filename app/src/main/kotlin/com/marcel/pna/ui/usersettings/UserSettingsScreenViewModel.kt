@@ -36,8 +36,24 @@ class UserSettingsScreenViewModel(
 
     fun onIntent(intent: UserSettingsIntent) {
         when (intent) {
+            is UserSettingsIntent.ErrorHandled -> {
+                onErrorHandled()
+            }
+
             is UserSettingsIntent.LoadData -> {
                 loadData(languageCode = intent.languageCode)
+            }
+
+            is UserSettingsIntent.SetLanguageCode -> {
+                modelState.update { state ->
+                    when (state) {
+                        is UserSettingsScreenModelState.Initialised -> state.copy(
+                            languageCode = intent.languageCode
+                        )
+
+                        else -> state
+                    }
+                }
             }
 
             is UserSettingsIntent.SetLoadTrendingHeadlinesBy -> {
@@ -52,12 +68,28 @@ class UserSettingsScreenViewModel(
                 }
             }
 
+            is UserSettingsIntent.SetNewsApiKey -> {
+                updateNewsApiKey(apiKey = intent.apiKey)
+            }
+
             is UserSettingsIntent.SetTrendingHeadlinesCountry -> {
                 updateTrendingHeadlinesCountry(intent.country.alpha2Code)
             }
 
             is UserSettingsIntent.UpdateCountries -> {
                 updateCountries()
+            }
+
+            is UserSettingsIntent.UpdateNewsApiKey -> {
+                modelState.update { state ->
+                    when (state) {
+                        is UserSettingsScreenModelState.Initialised -> state.copy(
+                            newsApiKey = intent.updatedApiKey
+                        )
+
+                        else -> state
+                    }
+                }
             }
         }
     }
@@ -72,16 +104,26 @@ class UserSettingsScreenViewModel(
                 Pair(countries, userSettings)
             }.collect { (countries, loadedSettings) ->
                 modelState.update { state ->
-                    when (state) {
+                    val stateToUpdate = when (state) {
                         is UserSettingsScreenModelState.Initialised -> state
-                            .copy(countries = countries, languageCode = languageCode)
-                            .toScreenModelState(loadedSettings = loadedSettings)
 
                         else -> UserSettingsScreenModelState.Initialised()
-                            .copy(countries = countries, languageCode = languageCode)
-                            .toScreenModelState(loadedSettings = loadedSettings)
                     }
+                    stateToUpdate.copy(countries = countries, languageCode = languageCode)
+                        .toScreenModelState(loadedSettings = loadedSettings)
                 }
+            }
+        }
+    }
+
+    private fun onErrorHandled() {
+        modelState.update { state ->
+            when (state) {
+                is UserSettingsScreenModelState.Initialised -> state.copy(
+                    errors = state.errors.dropLast(1)
+                )
+
+                else -> state
             }
         }
     }
@@ -99,12 +141,66 @@ class UserSettingsScreenViewModel(
             }
             countriesUseCaseProvider.updateCountriesUseCase.run()
                 .fold(
-                    onFailure = { error -> addError(error.toUserSettingsScreenError()) },
+                    onFailure = { error ->
+                        modelState.update { state ->
+                            when (state) {
+                                is UserSettingsScreenModelState.Initialised -> state.copy(
+                                    areCountriesUpdating = false
+                                )
+
+                                else -> state
+                            }
+                        }
+                        addError(error.toUserSettingsScreenError())
+                    },
                     onSuccess = {
                         modelState.update { state ->
                             when (state) {
                                 is UserSettingsScreenModelState.Initialised -> state.copy(
                                     areCountriesUpdating = false
+                                )
+
+                                else -> state
+                            }
+                        }
+                    },
+                )
+        }
+    }
+
+    private fun updateNewsApiKey(apiKey: String) {
+        viewModelScope.launch {
+            modelState.update { state ->
+                when (state) {
+                    is UserSettingsScreenModelState.Initialised -> state.copy(
+                        isSettingNewsApiKey = true
+                    )
+
+                    else -> state
+                }
+            }
+            val update = UserSettingsUpdate(
+                newsApiKey = apiKey
+            )
+            userSettingsUseCaseProvider.updateUserSettingsUseCase.run(userSettingsUpdate = update)
+                .fold(
+                    onFailure = { error ->
+                        modelState.update { state ->
+                            when (state) {
+                                is UserSettingsScreenModelState.Initialised -> state.copy(
+                                    isSettingNewsApiKey = false
+                                )
+
+                                else -> state
+                            }
+                        }
+                        addError(error.toUserSettingsScreenError())
+                    },
+                    onSuccess = {
+                        modelState.update { state ->
+                            when (state) {
+                                is UserSettingsScreenModelState.Initialised -> state.copy(
+                                    isSettingNewsApiKey = false
                                 )
 
                                 else -> state
@@ -137,13 +233,8 @@ class UserSettingsScreenViewModel(
                     errors = state.errors + error
                 )
 
-                else -> UserSettingsScreenModelState.Initialised(
-                    countries = emptyList(),
-                    country = null,
-                    areCountriesUpdating = false,
-                    errors = listOf(error),
-                    loadTrendingHeadlinesBy = LoadTrendingHeadlinesBySelection.Country,
-                    sourcesIds = null
+                else -> UserSettingsScreenModelState.Initialised().copy(
+                    errors = listOf(error)
                 )
             }
         }

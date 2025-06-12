@@ -4,9 +4,15 @@
     <string name="back_content_description">back</string>
     <string name="components_app_name">PNA.M Components</string>
     <string name="country_label">country</string>
+    <string name="enter_your_api_key_prompt">enter your %1$s key</string>
     <string name="headlines_heading">headlines</string>
+    <string name="hide_news_api_key_content_description">hide %1%1$s key</string>
     <string name="load_trending_headlines_by_label">load trending headlines by</string>
+    <string name="save_key_label">save key</string>
     <string name="select_trending_headlines_country_prompt">when you choose to load headlines by country you must select country</string>
+    <string name="network_error">cannot connect to network</string>
+    <string name="news_api_service" translatable="false">News API</string>
+    <string name="show_news_api_key_content_description">show %1%1$s key</string>
     <string name="sources_label">sources</string>
     <string name="update_countries_label">update countries</string>
     <string name="user_settings_screen_title">user settings</string>
