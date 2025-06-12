@@ -47,11 +47,14 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.marcel.pna.AppError
 import com.marcel.pna.R
 import com.marcel.pna.components.Centered
 import com.marcel.pna.components.Prompt
+import com.marcel.pna.components.PromptType
 import com.marcel.pna.components.kotlinextensions.toTitleCase
 import com.marcel.pna.components.theme.baseSpacingDiv2
+import com.marcel.pna.core.Result
 import com.marcel.pna.core.capitaliseWithLocal
 import com.marcel.pna.core.rememberDeviceLanguageCode
 import com.marcel.pna.theme.PNAMTheme
@@ -64,7 +67,8 @@ import org.koin.androidx.compose.koinViewModel
 fun UserSettingsScreen(
     modifier: Modifier = Modifier,
     navigationIcon: @Composable () -> Unit,
-    viewModel: UserSettingsScreenViewModel = koinViewModel()
+    viewModel: UserSettingsScreenViewModel = koinViewModel(),
+    onOpenExternalUrl: (String) -> Result<AppError, Unit>,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val languageCode = rememberDeviceLanguageCode()
@@ -94,6 +98,7 @@ fun UserSettingsScreen(
                     onErrorHandled = {
                         viewModel.onIntent(UserSettingsIntent.ErrorHandled)
                     },
+                    onOpenExternalUrl = onOpenExternalUrl,
                     onNewsApiKeyChanged = { updatedApiKey ->
                         viewModel.onIntent(
                             UserSettingsIntent.UpdateNewsApiKey(updatedApiKey = updatedApiKey)
@@ -147,6 +152,7 @@ private fun UserSettingsContent(
     modifier: Modifier = Modifier,
     state: UserSettingsScreenUiState.Initialised,
     onErrorHandled: () -> Unit,
+    onOpenExternalUrl: (String) -> Result<AppError, Unit>,
     onNewsApiKeyChanged: (String) -> Unit,
     onSetNewsApiKey: (String) -> Unit,
     onSetLoadTrendingHeadlinesBy: (LoadTrendingHeadlinesBySelection) -> Unit,
@@ -174,6 +180,7 @@ private fun UserSettingsContent(
             NewsApiServiceSettings(
                 isSettingNewsApiKey = state.isSettingNewsApiKey,
                 newsApiKey = state.newsApiKey,
+                onGenerateApiKey = { onOpenExternalUrl(state.generateNewsApiUrl) },
                 onNewsApiKeyChanged = onNewsApiKeyChanged,
                 onSaveNewsApiKey = onSetNewsApiKey
             )
@@ -227,6 +234,7 @@ private fun NewsApiServiceSettings(
     modifier: Modifier = Modifier,
     isSettingNewsApiKey: Boolean,
     newsApiKey: String,
+    onGenerateApiKey: () -> Unit,
     onNewsApiKeyChanged: (String) -> Unit,
     onSaveNewsApiKey: (String) -> Unit,
 ) {
@@ -244,6 +252,7 @@ private fun NewsApiServiceSettings(
             newsApiKey = newsApiKey,
             onNewsApiKeyChanged = onNewsApiKeyChanged,
             isSettingNewsApiKey = isSettingNewsApiKey,
+            onGenerateApiKey = onGenerateApiKey,
             onSaveNewsApiKey = onSaveNewsApiKey
         )
     }
@@ -296,7 +305,7 @@ private fun SettingsError(
     ) {
         Spacer(modifier = Modifier.height(baseSpacingDiv4))
         error?.let {
-            Prompt(message = it.toMessage(), isError = true)
+            Prompt(message = it.toMessage(), type = PromptType.Error)
             LaunchedEffect(Unit) {
                 delay(timeMillis = 5000)
                 onErrorHandled()
@@ -426,6 +435,7 @@ private fun NewsApiKey(
     modifier: Modifier = Modifier,
     isSettingNewsApiKey: Boolean,
     newsApiKey: String,
+    onGenerateApiKey: () -> Unit,
     onNewsApiKeyChanged: (String) -> Unit,
     onSaveNewsApiKey: (String) -> Unit
 ) {
@@ -488,7 +498,16 @@ private fun NewsApiKey(
                 }
             )
         }
-
+        Prompt(
+            modifier = Modifier.clickable {
+                onGenerateApiKey()
+            },
+            message = stringResource(
+                R.string.generate_news_api_key_prompt,
+                stringResource(R.string.news_api_service)
+            ).capitaliseWithLocal(),
+            type = PromptType.Link
+        )
     }
 }
 
@@ -508,6 +527,7 @@ fun UserSettingsScreenInitialisedPreview() {
                 countries = emptyList(),
                 country = null,
                 error = null,
+                generateNewsApiUrl = "",
                 isSettingNewsApiKey = false,
                 languageCode = null,
                 loadTrendingHeadlinesBy = LoadTrendingHeadlinesBySelection.Country,
@@ -515,6 +535,7 @@ fun UserSettingsScreenInitialisedPreview() {
                 sourcesIds = emptySet()
             ),
             onErrorHandled = {},
+            onOpenExternalUrl = { _ -> Result.Success(Unit) },
             onNewsApiKeyChanged = { _ -> },
             onSetNewsApiKey = {},
             onSetLoadTrendingHeadlinesBy = { _ -> },

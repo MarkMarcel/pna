@@ -2,6 +2,7 @@ package com.marcel.pna.ui.usersettings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.marcel.pna.AppConfig
 import com.marcel.pna.countries.domain.usecases.CountriesUseCaseProvider
 import com.marcel.pna.usersettings.domain.LoadTrendingHeadlinesBy
 import com.marcel.pna.usersettings.domain.UserSettingsUpdate
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class UserSettingsScreenViewModel(
+    private val appConfigProvider: () -> AppConfig,
     private val countriesUseCaseProvider: CountriesUseCaseProvider,
     private val userSettingsUseCaseProvider: UserSettingsUseCaseProvider,
 ) : ViewModel() {
@@ -107,7 +109,10 @@ class UserSettingsScreenViewModel(
                     val stateToUpdate = when (state) {
                         is UserSettingsScreenModelState.Initialised -> state
 
-                        else -> UserSettingsScreenModelState.Initialised()
+                        else -> UserSettingsScreenModelState.Initialised(
+                            generateNewsApiUrl = appConfigProvider()
+                                .servicesConfig.newsApiKeyGenerationUrl,
+                        )
                     }
                     stateToUpdate.copy(countries = countries, languageCode = languageCode)
                         .toScreenModelState(loadedSettings = loadedSettings)
@@ -233,7 +238,10 @@ class UserSettingsScreenViewModel(
                     errors = state.errors + error
                 )
 
-                else -> UserSettingsScreenModelState.Initialised().copy(
+                else -> UserSettingsScreenModelState.Initialised(
+                    generateNewsApiUrl = appConfigProvider()
+                        .servicesConfig.newsApiKeyGenerationUrl,
+                ).copy(
                     errors = listOf(error)
                 )
             }

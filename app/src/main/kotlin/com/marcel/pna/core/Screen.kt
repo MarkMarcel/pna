@@ -7,9 +7,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.marcel.pna.AppError
 import com.marcel.pna.HomeRoute
 import com.marcel.pna.PNAMLogo
 import com.marcel.pna.R
+import com.marcel.pna.openExternalUrl
 
 class ScreenScope(
     private val navController: NavController,
@@ -39,6 +41,10 @@ class ScreenScope(
 
     fun goBack() {
         navController.popBackStack()
+    }
+
+    fun goToExternalUrl(url: String): Result<AppError, Unit> {
+        return navController.openExternalUrl(url)
     }
 }
 
