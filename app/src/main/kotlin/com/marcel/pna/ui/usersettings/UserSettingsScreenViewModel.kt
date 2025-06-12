@@ -22,14 +22,15 @@ class UserSettingsScreenViewModel(
     private val countriesUseCaseProvider: CountriesUseCaseProvider,
     private val userSettingsUseCaseProvider: UserSettingsUseCaseProvider,
 ) : ViewModel() {
-    val uiState: StateFlow<UserSettingsScreenUiState>
-        get() = modelState
+    val uiState: StateFlow<UserSettingsScreenUiState> by lazy {
+        modelState
             .map { it.toUiState() }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(500),
                 initialValue = UserSettingsScreenUiState.NotInitialised
             )
+    }
 
     private val modelState =
         MutableStateFlow<UserSettingsScreenModelState>(UserSettingsScreenModelState.NotInitialised)

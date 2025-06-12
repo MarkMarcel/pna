@@ -5,6 +5,7 @@ import com.marcel.pna.countries.domain.CountryError
 import com.marcel.pna.usersettings.domain.LoadTrendingHeadlinesBy
 import com.marcel.pna.usersettings.domain.UserSettings
 import com.marcel.pna.usersettings.domain.UserSettingsError
+import java.util.Locale
 
 data class UiCountry(val alpha2Code: String, val name: String)
 
@@ -124,5 +125,8 @@ fun UserSettingsScreenModelState.Initialised.toScreenModelState(
 
 private fun Country.toUi(languageCode: String) = UiCountry(
     alpha2Code = alpha2Code,
-    name = if (languageCode.lowercase() == "de") germanName else englishName
+    name = when (languageCode) {
+        Locale.GERMAN.language -> germanName
+        else -> englishName
+    }
 )

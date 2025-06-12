@@ -1,5 +1,7 @@
 package com.marcel.pna.countries.domain.usecases
 
+import com.marcel.pna.core.BACKGROUND_DISPATCHER
+import com.marcel.pna.core.IO_DISPATCHER
 import com.marcel.pna.countries.countryApiResponsesTestData
 import com.marcel.pna.countries.countryDatabaseModelsTestData
 import com.marcel.pna.countries.data.CountriesLocalDataSource
@@ -21,6 +23,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.koin.core.logger.Level
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
@@ -44,7 +47,7 @@ class GetCountriesUseCaseTest : KoinTest {
                 single { CountriesRemoteDataSource(api = get(), logger = get()) }
                 single<CountriesRepository> {
                     DefaultCountriesRepository(
-                        ioDispatcher = get(),
+                        ioDispatcher = get(named(IO_DISPATCHER)),
                         localDataSource = get(),
                         remoteDataSource = get()
                     )
@@ -66,7 +69,9 @@ class GetCountriesUseCaseTest : KoinTest {
         // Replace coroutine dispatchers
         declareTestDispatchers(this) // `this` refers to runTest scope
 
-        val useCase = GetCountriesUseCase(get(), get())
+        val useCase = GetCountriesUseCase(
+            backgroundDispatcher = get(named(BACKGROUND_DISPATCHER)), countriesRepository = get()
+        )
         val countries = useCase.run().firstOrNull()
         runCurrent()
         assertEquals(
