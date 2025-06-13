@@ -95,62 +95,62 @@ class GetHeadlinesUseCaseTest : KoinTest {
                     400,
                     apiKeyDisabledErrorBody
                 )
-            ) to HeadlinesLoadError.ApiKeyDisabled,
+            ) to HeadlinesLoadError.API_KEY_DISABLED,
             HttpException(
                 Response.error<NewsApiResponse>(
                     400,
                     apiKeyExhaustedErrorBody
                 )
-            ) to HeadlinesLoadError.ApiKeyExhausted,
+            ) to HeadlinesLoadError.API_KEY_EXHAUSTED,
             HttpException(
                 Response.error<NewsApiResponse>(
                     401,
                     apiKeyInvalidErrorBody
                 )
-            ) to HeadlinesLoadError.ApiKeyInvalid,
+            ) to HeadlinesLoadError.API_KEY_INVALID,
             HttpException(
                 Response.error<NewsApiResponse>(
                     401,
                     apiKeyMissingErrorBody
                 )
-            ) to HeadlinesLoadError.ApiKeyInvalid,
+            ) to HeadlinesLoadError.API_KEY_INVALID,
             HttpException(
                 Response.error<NewsApiResponse>(
                     400,
                     parameterInvalidErrorBody
                 )
-            ) to HeadlinesLoadError.Server,
+            ) to HeadlinesLoadError.SERVER,
             HttpException(
                 Response.error<NewsApiResponse>(
                     400,
                     parametersMissingErrorBody
                 )
-            ) to HeadlinesLoadError.Server,
+            ) to HeadlinesLoadError.SERVER,
             HttpException(
                 Response.error<NewsApiResponse>(
                     429,
                     rateLimitedErrorBody
                 )
-            ) to HeadlinesLoadError.RateLimited,
+            ) to HeadlinesLoadError.RATE_LIMITED,
             HttpException(
                 Response.error<NewsApiResponse>(
                     400,
                     sourcesTooManyErrorBody
                 )
-            ) to HeadlinesLoadError.SourcesTooMany,
+            ) to HeadlinesLoadError.SOURCES_TOO_MANY,
             HttpException(
                 Response.error<NewsApiResponse>(
                     400,
                     sourceDoesNotExistErrorBody
                 )
-            ) to HeadlinesLoadError.SourceDoesNotExist,
+            ) to HeadlinesLoadError.SOURCE_DOES_NOT_EXIST,
             HttpException(
                 Response.error<NewsApiResponse>(
                     500,
                     unexpectedErrorBody
                 )
-            ) to HeadlinesLoadError.Server,
-            IOException("Network issue") to HeadlinesLoadError.Network // Must be last due to retries in datasource
+            ) to HeadlinesLoadError.SERVER,
+            IOException("Network issue") to HeadlinesLoadError.NETWORK // Must be last due to retries in datasource
         )
         var request = HeadlinesRequest.Trending(
             loadTrendingHeadlinesBy = LoadTrendingHeadlinesBy.Country(
@@ -315,7 +315,7 @@ class GetHeadlinesUseCaseTest : KoinTest {
         // Second call should return error
         val result = useCase.run(request = request)
         assert(result is Result.Failure)
-        assert((result as Result.Failure).reason == HeadlinesLoadError.Debounced)
+        assert((result as Result.Failure).reason == HeadlinesLoadError.DEBOUNCED)
     }
 
 

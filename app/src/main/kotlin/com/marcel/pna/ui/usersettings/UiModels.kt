@@ -69,6 +69,19 @@ sealed class UserSettingsScreenModelState {
         val newsApiKey: String = "",
         val sourcesIds: Set<String>? = null,
     ) : UserSettingsScreenModelState()
+
+    companion object {
+        fun UserSettingsScreenModelState.asInitialised(
+            generateNewsApiUrl: String
+        ): Initialised = when (this) {
+            is Initialised -> this
+            is NotInitialised -> {
+                Initialised(
+                    generateNewsApiUrl = generateNewsApiUrl
+                )
+            }
+        }
+    }
 }
 
 fun CountryError.toUserSettingsScreenError() = when (this) {

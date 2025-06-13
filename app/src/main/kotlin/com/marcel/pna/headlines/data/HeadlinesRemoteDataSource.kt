@@ -34,7 +34,7 @@ class HeadlinesRemoteDataSource(
     ): Result<HeadlinesLoadError, HeadlinesPage> {
         mutex.withLock {
             if (request == previousRequest) {
-                return Result.Failure(HeadlinesLoadError.Debounced)
+                return Result.Failure(HeadlinesLoadError.DEBOUNCED)
             }
             previousRequest = request
         }
@@ -71,29 +71,29 @@ class HeadlinesRemoteDataSource(
         }.mapFailure { throwable ->
             logger.logError(throwable)
             when (throwable) {
-                is IOException -> HeadlinesLoadError.Network
+                is IOException -> HeadlinesLoadError.NETWORK
                 is HttpException -> {
                     val errorBody = throwable.response()?.errorBody()
                     val adapter = moshi.adapter(NewsErrorApiResponse::class.java)
                     val error = errorBody?.let { adapter.fromJson(it.source()) }
 
                     when (error?.code) {
-                        "apiKeyDisabled" -> HeadlinesLoadError.ApiKeyDisabled
-                        "apiKeyExhausted" -> HeadlinesLoadError.ApiKeyExhausted
-                        "apiKeyInvalid" -> HeadlinesLoadError.ApiKeyInvalid
-                        "apiKeyMissing" -> HeadlinesLoadError.ApiKeyInvalid
+                        "apiKeyDisabled" -> HeadlinesLoadError.API_KEY_DISABLED
+                        "apiKeyExhausted" -> HeadlinesLoadError.API_KEY_EXHAUSTED
+                        "apiKeyInvalid" -> HeadlinesLoadError.API_KEY_INVALID
+                        "apiKeyMissing" -> HeadlinesLoadError.API_KEY_INVALID
                         "parameterInvalid",
-                        "parametersMissing" -> HeadlinesLoadError.Server
+                        "parametersMissing" -> HeadlinesLoadError.SERVER
 
-                        "rateLimited" -> HeadlinesLoadError.RateLimited
-                        "sourcesTooMany" -> HeadlinesLoadError.SourcesTooMany
-                        "sourceDoesNotExist" -> HeadlinesLoadError.SourceDoesNotExist
-                        "unexpectedError" -> HeadlinesLoadError.Server
-                        else -> HeadlinesLoadError.Server
+                        "rateLimited" -> HeadlinesLoadError.RATE_LIMITED
+                        "sourcesTooMany" -> HeadlinesLoadError.SOURCES_TOO_MANY
+                        "sourceDoesNotExist" -> HeadlinesLoadError.SOURCE_DOES_NOT_EXIST
+                        "unexpectedError" -> HeadlinesLoadError.SERVER
+                        else -> HeadlinesLoadError.SERVER
                     }
                 }
 
-                else -> HeadlinesLoadError.Server
+                else -> HeadlinesLoadError.SERVER
             }
         }
         // Reset previousRequest on failure to allow a new request

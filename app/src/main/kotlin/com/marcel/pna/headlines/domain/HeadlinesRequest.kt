@@ -1,5 +1,6 @@
 package com.marcel.pna.headlines.domain
 
+import com.marcel.pna.headlines.category.ArticleCategory
 import com.marcel.pna.usersettings.domain.LoadTrendingHeadlinesBy
 
 sealed class HeadlinesRequest(
@@ -7,9 +8,9 @@ sealed class HeadlinesRequest(
     open val pageSize: Int?,
 ) {
     data class Category(
-        val category: Category,
-        override val page: Int,
-        override val pageSize: Int,
+        val category: ArticleCategory,
+        override val page: Int = 1,
+        override val pageSize: Int? = null,
     ) : HeadlinesRequest(page, pageSize)
 
     data class Trending(
@@ -23,6 +24,14 @@ sealed class HeadlinesRequest(
                     is LoadTrendingHeadlinesBy.Country -> loadTrendingHeadlinesBy.alpha2Code.isNotBlank()
                     is LoadTrendingHeadlinesBy.Sources -> loadTrendingHeadlinesBy.sourceIds.isNotEmpty()
                 }
+            }
+    }
+
+    companion object {
+        val HeadlinesRequest.nextPage: HeadlinesRequest
+            get() = when (this) {
+                is Category -> copy(page = page + 1)
+                is Trending -> copy(page = page + 1)
             }
     }
 }

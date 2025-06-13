@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.marcel.pna.AppConfig
 import com.marcel.pna.countries.domain.usecases.CountriesUseCaseProvider
+import com.marcel.pna.ui.usersettings.UserSettingsScreenModelState.Companion.asInitialised
 import com.marcel.pna.usersettings.domain.LoadTrendingHeadlinesBy
 import com.marcel.pna.usersettings.domain.UserSettingsUpdate
 import com.marcel.pna.usersettings.domain.usecases.UserSettingsUseCaseProvider
@@ -49,24 +50,20 @@ class UserSettingsScreenViewModel(
 
             is UserSettingsScreenIntent.SetLanguageCode -> {
                 modelState.update { state ->
-                    when (state) {
-                        is UserSettingsScreenModelState.Initialised -> state.copy(
-                            languageCode = intent.languageCode
-                        )
-
-                        else -> state
+                    state.asInitialised(
+                        generateNewsApiUrl = appConfigProvider().servicesConfig.newsApiKeyGenerationUrl,
+                    ).run {
+                        copy(languageCode = intent.languageCode)
                     }
                 }
             }
 
             is UserSettingsScreenIntent.SetLoadTrendingHeadlinesBy -> {
                 modelState.update { state ->
-                    when (state) {
-                        is UserSettingsScreenModelState.Initialised -> state.copy(
-                            loadTrendingHeadlinesBy = intent.selection
-                        )
-
-                        else -> state
+                    state.asInitialised(
+                        generateNewsApiUrl = appConfigProvider().servicesConfig.newsApiKeyGenerationUrl,
+                    ).run {
+                        copy(loadTrendingHeadlinesBy = intent.selection)
                     }
                 }
             }
@@ -85,12 +82,10 @@ class UserSettingsScreenViewModel(
 
             is UserSettingsScreenIntent.UpdateNewsApiKey -> {
                 modelState.update { state ->
-                    when (state) {
-                        is UserSettingsScreenModelState.Initialised -> state.copy(
-                            newsApiKey = intent.updatedApiKey
-                        )
-
-                        else -> state
+                    state.asInitialised(
+                        generateNewsApiUrl = appConfigProvider().servicesConfig.newsApiKeyGenerationUrl,
+                    ).run {
+                        copy(newsApiKey = intent.updatedApiKey)
                     }
                 }
             }
@@ -107,29 +102,31 @@ class UserSettingsScreenViewModel(
                 Pair(countries, userSettings)
             }.collect { (countries, loadedSettings) ->
                 modelState.update { state ->
-                    val stateToUpdate = when (state) {
-                        is UserSettingsScreenModelState.Initialised -> state
-
-                        else -> UserSettingsScreenModelState.Initialised(
-                            generateNewsApiUrl = appConfigProvider()
-                                .servicesConfig.newsApiKeyGenerationUrl,
+                    state.asInitialised(
+                        generateNewsApiUrl = appConfigProvider().servicesConfig.newsApiKeyGenerationUrl,
+                    ).run {
+                        copy(
+                            countries = countries,
+                            languageCode = languageCode
+                        ).toScreenModelState(
+                            loadedSettings = loadedSettings
                         )
                     }
-                    stateToUpdate.copy(countries = countries, languageCode = languageCode)
-                        .toScreenModelState(loadedSettings = loadedSettings)
                 }
             }
         }
     }
 
     private fun onErrorHandled() {
-        modelState.update { state ->
-            when (state) {
-                is UserSettingsScreenModelState.Initialised -> state.copy(
-                    errors = state.errors.dropLast(1)
-                )
-
-                else -> state
+        viewModelScope.launch {
+            modelState.update { state ->
+                state.asInitialised(
+                    generateNewsApiUrl = appConfigProvider().servicesConfig.newsApiKeyGenerationUrl,
+                ).run {
+                    copy(
+                        errors = errors.dropLast(1)
+                    )
+                }
             }
         }
     }
@@ -137,36 +134,30 @@ class UserSettingsScreenViewModel(
     private fun updateCountries() {
         viewModelScope.launch {
             modelState.update { state ->
-                when (state) {
-                    is UserSettingsScreenModelState.Initialised -> state.copy(
-                        areCountriesUpdating = true
-                    )
-
-                    else -> state
+                state.asInitialised(
+                    generateNewsApiUrl = appConfigProvider().servicesConfig.newsApiKeyGenerationUrl,
+                ).run {
+                    copy(areCountriesUpdating = true)
                 }
             }
             countriesUseCaseProvider.updateCountriesUseCase.run()
                 .fold(
                     onFailure = { error ->
                         modelState.update { state ->
-                            when (state) {
-                                is UserSettingsScreenModelState.Initialised -> state.copy(
-                                    areCountriesUpdating = false
-                                )
-
-                                else -> state
+                            state.asInitialised(
+                                generateNewsApiUrl = appConfigProvider().servicesConfig.newsApiKeyGenerationUrl,
+                            ).run {
+                                copy(areCountriesUpdating = false)
                             }
                         }
                         addError(error.toUserSettingsScreenError())
                     },
                     onSuccess = {
                         modelState.update { state ->
-                            when (state) {
-                                is UserSettingsScreenModelState.Initialised -> state.copy(
-                                    areCountriesUpdating = false
-                                )
-
-                                else -> state
+                            state.asInitialised(
+                                generateNewsApiUrl = appConfigProvider().servicesConfig.newsApiKeyGenerationUrl,
+                            ).run {
+                                copy(areCountriesUpdating = false)
                             }
                         }
                     },
@@ -177,12 +168,10 @@ class UserSettingsScreenViewModel(
     private fun updateNewsApiKey(apiKey: String) {
         viewModelScope.launch {
             modelState.update { state ->
-                when (state) {
-                    is UserSettingsScreenModelState.Initialised -> state.copy(
-                        isSettingNewsApiKey = true
-                    )
-
-                    else -> state
+                state.asInitialised(
+                    generateNewsApiUrl = appConfigProvider().servicesConfig.newsApiKeyGenerationUrl,
+                ).run {
+                    copy(isSettingNewsApiKey = true)
                 }
             }
             val update = UserSettingsUpdate(
@@ -192,24 +181,20 @@ class UserSettingsScreenViewModel(
                 .fold(
                     onFailure = { error ->
                         modelState.update { state ->
-                            when (state) {
-                                is UserSettingsScreenModelState.Initialised -> state.copy(
-                                    isSettingNewsApiKey = false
-                                )
-
-                                else -> state
+                            state.asInitialised(
+                                generateNewsApiUrl = appConfigProvider().servicesConfig.newsApiKeyGenerationUrl,
+                            ).run {
+                                copy(isSettingNewsApiKey = false)
                             }
                         }
                         addError(error.toUserSettingsScreenError())
                     },
                     onSuccess = {
                         modelState.update { state ->
-                            when (state) {
-                                is UserSettingsScreenModelState.Initialised -> state.copy(
-                                    isSettingNewsApiKey = false
-                                )
-
-                                else -> state
+                            state.asInitialised(
+                                generateNewsApiUrl = appConfigProvider().servicesConfig.newsApiKeyGenerationUrl,
+                            ).run {
+                                copy(isSettingNewsApiKey = false)
                             }
                         }
                     },
@@ -234,17 +219,10 @@ class UserSettingsScreenViewModel(
 
     private fun addError(error: UserSettingsScreenError) {
         modelState.update { state ->
-            when (state) {
-                is UserSettingsScreenModelState.Initialised -> state.copy(
-                    errors = state.errors + error
-                )
-
-                else -> UserSettingsScreenModelState.Initialised(
-                    generateNewsApiUrl = appConfigProvider()
-                        .servicesConfig.newsApiKeyGenerationUrl,
-                ).copy(
-                    errors = listOf(error)
-                )
+            state.asInitialised(
+                generateNewsApiUrl = appConfigProvider().servicesConfig.newsApiKeyGenerationUrl,
+            ).run {
+                copy(errors = errors + error)
             }
         }
     }

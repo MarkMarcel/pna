@@ -1,7 +1,9 @@
 package com.marcel.pna.ui.home
 
 import com.marcel.pna.MainDispatcherRule
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -11,6 +13,7 @@ import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeScreenViewModelTest {
+
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
@@ -18,10 +21,13 @@ class HomeScreenViewModelTest {
     @Test
     fun `When SelectedHeadlineCategoryChanged intent received, Then selectedCategoryIndex changed`() =
         runTest {
-            val viewModel = HomeScreenViewModel()
-            var state: HomeScreenUiState? = null
+            val viewModel = HomeScreenViewModel(
+                headlinesUseCaseProvider = mockk(),
+                userSettingsUseCaseProvider = mockk()
+            )
+            var state: HomeScreenUiState.Initialised? = null
             val uiStateCollectionJob = launch {
-                viewModel.uiState.collect {
+                viewModel.uiState.filterIsInstance<HomeScreenUiState.Initialised>().collect {
                     state = it
                 }
             }

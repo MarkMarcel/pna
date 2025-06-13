@@ -14,10 +14,13 @@
     <string name="hide_news_api_key_content_description">Hide your %1$s key</string>
     <string name="load_trending_headlines_by_label">Load trending headlines by</string>
     <string name="network_error">Cannot connect to the network</string>
+    <string name="news_api_access_error_heading">Your %1$s access restricted</string>
+    <string name="news_api_access_error_prompt">Your %1$s key is missing, wrong or disabled</string>
     <string name="news_api_service" translatable="false">News API</string>
     <string name="save_key_label">Save key</string>
     <string name="science_label">Science</string>
     <string name="select_trending_headlines_country_prompt">To load headlines by country, you need to select a country</string>
+    <string name="settings_btn">Settings</string>
     <string name="show_news_api_key_content_description">Show your %1$s key</string>
     <string name="sources_label">Sources</string>
     <string name="sports_label">Sports</string>

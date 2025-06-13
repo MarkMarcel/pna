@@ -2,6 +2,7 @@ package com.marcel.pna
 
 import android.app.Application
 import com.marcel.pna.core.CoreModule
+import com.marcel.pna.countries.CountriesModule
 import com.marcel.pna.headlines.HeadlinesModule
 import com.marcel.pna.ui.UiModule
 import com.marcel.pna.usersettings.SettingsModule
@@ -19,6 +20,7 @@ class PNAMApplication : Application() {
                 listOf(
                     AppModule,
                     CoreModule,
+                    CountriesModule,
                     HeadlinesModule,
                     SettingsModule,
                     UiModule,
