@@ -28,7 +28,7 @@ class UserSettingsScreenViewModel(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(500),
-                initialValue = UserSettingsScreenUiState.NotInitialised
+                initialValue = UserSettingsScreenModelState.NotInitialised.toUiState()
             )
     }
 
@@ -37,17 +37,17 @@ class UserSettingsScreenViewModel(
 
     private var userSettingsCollectionJob: Job? = null
 
-    fun onIntent(intent: UserSettingsIntent) {
+    fun onIntent(intent: UserSettingsScreenIntent) {
         when (intent) {
-            is UserSettingsIntent.ErrorHandled -> {
+            is UserSettingsScreenIntent.ErrorHandled -> {
                 onErrorHandled()
             }
 
-            is UserSettingsIntent.LoadData -> {
+            is UserSettingsScreenIntent.LoadData -> {
                 loadData(languageCode = intent.languageCode)
             }
 
-            is UserSettingsIntent.SetLanguageCode -> {
+            is UserSettingsScreenIntent.SetLanguageCode -> {
                 modelState.update { state ->
                     when (state) {
                         is UserSettingsScreenModelState.Initialised -> state.copy(
@@ -59,7 +59,7 @@ class UserSettingsScreenViewModel(
                 }
             }
 
-            is UserSettingsIntent.SetLoadTrendingHeadlinesBy -> {
+            is UserSettingsScreenIntent.SetLoadTrendingHeadlinesBy -> {
                 modelState.update { state ->
                     when (state) {
                         is UserSettingsScreenModelState.Initialised -> state.copy(
@@ -71,19 +71,19 @@ class UserSettingsScreenViewModel(
                 }
             }
 
-            is UserSettingsIntent.SetNewsApiKey -> {
+            is UserSettingsScreenIntent.SetNewsApiKey -> {
                 updateNewsApiKey(apiKey = intent.apiKey)
             }
 
-            is UserSettingsIntent.SetTrendingHeadlinesCountry -> {
+            is UserSettingsScreenIntent.SetTrendingHeadlinesCountry -> {
                 updateTrendingHeadlinesCountry(intent.country.alpha2Code)
             }
 
-            is UserSettingsIntent.UpdateCountries -> {
+            is UserSettingsScreenIntent.UpdateCountries -> {
                 updateCountries()
             }
 
-            is UserSettingsIntent.UpdateNewsApiKey -> {
+            is UserSettingsScreenIntent.UpdateNewsApiKey -> {
                 modelState.update { state ->
                     when (state) {
                         is UserSettingsScreenModelState.Initialised -> state.copy(

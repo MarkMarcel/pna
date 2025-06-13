@@ -65,7 +65,7 @@ class UserSettingsScreenViewModelTest {
                 }
         }
         // Generate first error
-        viewModel.onIntent(UserSettingsIntent.UpdateCountries)
+        viewModel.onIntent(UserSettingsScreenIntent.UpdateCountries)
         advanceUntilIdle()
         // Check that current error is correct
         assertEquals(
@@ -74,7 +74,7 @@ class UserSettingsScreenViewModelTest {
         )
         // Generate second error
         viewModel.onIntent(
-            UserSettingsIntent.SetTrendingHeadlinesCountry(
+            UserSettingsScreenIntent.SetTrendingHeadlinesCountry(
                 country = UiCountry(
                     alpha2Code = "",
                     name = ""
@@ -82,7 +82,7 @@ class UserSettingsScreenViewModelTest {
             )
         )
         // Handle first error
-        viewModel.onIntent(UserSettingsIntent.ErrorHandled)
+        viewModel.onIntent(UserSettingsScreenIntent.ErrorHandled)
         advanceUntilIdle()
         // Check that current error is correct
         assertEquals(
@@ -90,7 +90,7 @@ class UserSettingsScreenViewModelTest {
             actual = uiState?.error
         )
         // Handle second error
-        viewModel.onIntent(UserSettingsIntent.ErrorHandled)
+        viewModel.onIntent(UserSettingsScreenIntent.ErrorHandled)
         advanceUntilIdle()
         // Check that current error is correct
         assertEquals(
@@ -126,7 +126,7 @@ class UserSettingsScreenViewModelTest {
             countriesUseCaseProvider = countriesUseCaseProvider,
             userSettingsUseCaseProvider = userSettingsUseCaseProvider
         )
-        viewModel.onIntent(UserSettingsIntent.LoadData(languageCode = locale.language))
+        viewModel.onIntent(UserSettingsScreenIntent.LoadData(languageCode = locale.language))
         // Expected Results
         val expectedUiState = UserSettingsScreenModelState.Initialised(
             countries = countriesTestData,

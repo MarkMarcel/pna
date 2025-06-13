@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,6 +23,7 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -80,53 +80,46 @@ fun UserSettingsScreen(
             )
         }
     ) { contentPadding ->
-        when (uiState) {
-            is UserSettingsScreenUiState.NotInitialised -> {
-                Centered(modifier = Modifier.fillMaxSize()) {
-                    CircularProgressIndicator()
-                }
-                LaunchedEffect(Unit) {
-                    viewModel.onIntent(UserSettingsIntent.LoadData(languageCode = languageCode))
-                }
-            }
-
-            is UserSettingsScreenUiState.Initialised -> {
-                UserSettingsContent(
-                    modifier = Modifier
-                        .padding(top = contentPadding.calculateTopPadding()),
-                    state = uiState as UserSettingsScreenUiState.Initialised,
-                    onErrorHandled = {
-                        viewModel.onIntent(UserSettingsIntent.ErrorHandled)
-                    },
-                    onOpenExternalUrl = onOpenExternalUrl,
-                    onNewsApiKeyChanged = { updatedApiKey ->
-                        viewModel.onIntent(
-                            UserSettingsIntent.UpdateNewsApiKey(updatedApiKey = updatedApiKey)
-                        )
-                    },
-                    onSetLoadTrendingHeadlinesBy = { loadTrendingHeadlinesBy ->
-                        viewModel.onIntent(
-                            UserSettingsIntent.SetLoadTrendingHeadlinesBy(
-                                loadTrendingHeadlinesBy
-                            )
-                        )
-                    },
-                    onSetNewsApiKey = { apiKey ->
-                        viewModel.onIntent(
-                            UserSettingsIntent.SetNewsApiKey(apiKey = apiKey)
-                        )
-                    },
-                    onSetTrendingHeadlinesCountry = { country ->
-                        viewModel.onIntent(UserSettingsIntent.SetTrendingHeadlinesCountry(country = country))
-                    },
-                    onUpdateCountries = {
-                        viewModel.onIntent(UserSettingsIntent.UpdateCountries)
-                    }
+        UserSettingsContent(
+            modifier = Modifier.padding(top = contentPadding.calculateTopPadding()),
+            state = uiState,
+            onErrorHandled = {
+                viewModel.onIntent(UserSettingsScreenIntent.ErrorHandled)
+            },
+            onLoadData = {
+                viewModel.onIntent(UserSettingsScreenIntent.LoadData(languageCode = languageCode))
+            },
+            onNewsApiKeyChanged = { updatedApiKey ->
+                viewModel.onIntent(
+                    UserSettingsScreenIntent.UpdateNewsApiKey(updatedApiKey = updatedApiKey)
                 )
-                LaunchedEffect(languageCode) {
-                    viewModel.onIntent(UserSettingsIntent.SetLanguageCode(languageCode = languageCode))
-                }
+            },
+            onOpenExternalUrl = onOpenExternalUrl,
+            onSetLoadTrendingHeadlinesBy = { loadTrendingHeadlinesBy ->
+                viewModel.onIntent(
+                    UserSettingsScreenIntent.SetLoadTrendingHeadlinesBy(
+                        loadTrendingHeadlinesBy
+                    )
+                )
+            },
+            onSetNewsApiKey = { apiKey ->
+                viewModel.onIntent(
+                    UserSettingsScreenIntent.SetNewsApiKey(apiKey = apiKey)
+                )
+            },
+            onSetTrendingHeadlinesCountry = { country ->
+                viewModel.onIntent(
+                    UserSettingsScreenIntent.SetTrendingHeadlinesCountry(
+                        country = country
+                    )
+                )
+            },
+            onUpdateCountries = {
+                viewModel.onIntent(UserSettingsScreenIntent.UpdateCountries)
             }
+        )
+        LaunchedEffect(languageCode) {
+            viewModel.onIntent(UserSettingsScreenIntent.SetLanguageCode(languageCode = languageCode))
         }
     }
 }
@@ -146,9 +139,52 @@ private fun UserSettingsTopBar(
     )
 }
 
-
 @Composable
 private fun UserSettingsContent(
+    modifier: Modifier = Modifier,
+    state: UserSettingsScreenUiState,
+    onErrorHandled: () -> Unit,
+    onLoadData: () -> Unit,
+    onNewsApiKeyChanged: (String) -> Unit,
+    onOpenExternalUrl: (String) -> Result<AppError, Unit>,
+    onSetLoadTrendingHeadlinesBy: (LoadTrendingHeadlinesBySelection) -> Unit,
+    onSetNewsApiKey: (String) -> Unit,
+    onSetTrendingHeadlinesCountry: (UiCountry) -> Unit,
+    onUpdateCountries: () -> Unit,
+) {
+    Surface {
+        when (state) {
+            is UserSettingsScreenUiState.NotInitialised -> {
+                Centered(
+                    modifier = modifier
+                ) {
+                    CircularProgressIndicator()
+                }
+                LaunchedEffect(Unit) {
+                    onLoadData()
+                }
+            }
+
+            is UserSettingsScreenUiState.Initialised -> {
+                UserSettingsInitialisedContent(
+                    modifier = modifier,
+                    state = state,
+                    onErrorHandled = onErrorHandled,
+                    onOpenExternalUrl = onOpenExternalUrl,
+                    onNewsApiKeyChanged = onNewsApiKeyChanged,
+                    onSetLoadTrendingHeadlinesBy = onSetLoadTrendingHeadlinesBy,
+                    onSetNewsApiKey = onSetNewsApiKey,
+                    onSetTrendingHeadlinesCountry = onSetTrendingHeadlinesCountry,
+                    onUpdateCountries = onUpdateCountries,
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun UserSettingsInitialisedContent(
     modifier: Modifier = Modifier,
     state: UserSettingsScreenUiState.Initialised,
     onErrorHandled: () -> Unit,
@@ -535,6 +571,25 @@ fun UserSettingsScreenInitialisedPreview() {
                 sourcesIds = emptySet()
             ),
             onErrorHandled = {},
+            onLoadData = {},
+            onOpenExternalUrl = { _ -> Result.Success(Unit) },
+            onNewsApiKeyChanged = { _ -> },
+            onSetNewsApiKey = {},
+            onSetLoadTrendingHeadlinesBy = { _ -> },
+            onSetTrendingHeadlinesCountry = { _ -> },
+            onUpdateCountries = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun UserSettingsScreenNotInitialisedPreview() {
+    PNAMTheme {
+        UserSettingsContent(
+            state = UserSettingsScreenUiState.NotInitialised,
+            onErrorHandled = {},
+            onLoadData = {},
             onOpenExternalUrl = { _ -> Result.Success(Unit) },
             onNewsApiKeyChanged = { _ -> },
             onSetNewsApiKey = {},

@@ -17,24 +17,24 @@ enum class UserSettingsScreenError {
     FailedToSave, NetWork, NoCountry, NoSources, Server, Unknown
 }
 
-sealed class UserSettingsIntent {
-    data object ErrorHandled : UserSettingsIntent()
+sealed class UserSettingsScreenIntent {
+    data object ErrorHandled : UserSettingsScreenIntent()
 
-    data class LoadData(val languageCode: String) : UserSettingsIntent()
+    data class LoadData(val languageCode: String) : UserSettingsScreenIntent()
 
-    data class SetLanguageCode(val languageCode: String) : UserSettingsIntent()
+    data class SetLanguageCode(val languageCode: String) : UserSettingsScreenIntent()
 
     data class SetLoadTrendingHeadlinesBy(
         val selection: LoadTrendingHeadlinesBySelection
-    ) : UserSettingsIntent()
+    ) : UserSettingsScreenIntent()
 
-    data class SetNewsApiKey(val apiKey: String) : UserSettingsIntent()
+    data class SetNewsApiKey(val apiKey: String) : UserSettingsScreenIntent()
 
-    data class SetTrendingHeadlinesCountry(val country: UiCountry) : UserSettingsIntent()
+    data class SetTrendingHeadlinesCountry(val country: UiCountry) : UserSettingsScreenIntent()
 
-    data class UpdateNewsApiKey(val updatedApiKey: String) : UserSettingsIntent()
+    data class UpdateNewsApiKey(val updatedApiKey: String) : UserSettingsScreenIntent()
 
-    data object UpdateCountries : UserSettingsIntent()
+    data object UpdateCountries : UserSettingsScreenIntent()
 }
 
 sealed class UserSettingsScreenUiState {
