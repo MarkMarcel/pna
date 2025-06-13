@@ -39,7 +39,7 @@ import kotlin.test.assertTrue
 
 class UpdateUserSettingsUseCaseTest : KoinTest {
     @get:Rule
-    val koinTestRule = KoinTestRule.Companion.create {
+    val koinTestRule = KoinTestRule.create {
         printLogger()
         modules(
             listOf(

@@ -19,10 +19,10 @@ class ComponentsDemoActivity : ComponentActivity() {
         setContent {
             PNAComponentsTheme {
                 Box(
-                    Modifier.Companion.safeContentPadding()
+                    Modifier.safeContentPadding()
                 ) {
                     Box(
-                        Modifier.Companion
+                        Modifier
                             .fillMaxSize()
                             .wrapContentSize()
                     ) {

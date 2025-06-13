@@ -33,7 +33,7 @@ import kotlin.test.assertEquals
 
 class GetCountriesUseCaseTest : KoinTest {
     @get:Rule
-    val koinTestRule = KoinTestRule.Companion.create {
+    val koinTestRule = KoinTestRule.create {
         printLogger(level = Level.DEBUG)
         modules(
             module {

@@ -41,7 +41,7 @@ class HeadlinesRemoteDataSource(
             throw IllegalArgumentException("Invalid HeadlinesRequest.Trending, ensure values match LoadTrendingHeadlinesBy")
         }
 
-        val result = Result.Companion.catching(
+        val result = Result.catching(
             delayMillisProvider = { attempt -> attempt * 1000L },
             shouldRetryProvider = { attempt, error -> attempt <= 3 && error is IOException }
         ) {
