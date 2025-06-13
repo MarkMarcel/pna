@@ -7,10 +7,9 @@ import com.marcel.pna.countries.countriesTestData
 import com.marcel.pna.countries.domain.CountriesRepository
 import com.marcel.pna.countries.domain.CountryError
 import com.marcel.pna.countries.domain.usecases.CountriesUseCaseProvider
-import com.marcel.pna.usersettings.domain.LoadTrendingHeadlinesBy
-import com.marcel.pna.usersettings.domain.UserSettings
 import com.marcel.pna.usersettings.domain.UserSettingsRepository
 import com.marcel.pna.usersettings.domain.usecases.UserSettingsUseCaseProvider
+import com.marcel.pna.usersettings.userSettingsDefaultTestInstance
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -104,14 +103,7 @@ class UserSettingsScreenViewModelTest {
     @Test
     fun `When LoadDataIntent received, Then state updates to loaded data`() = runTest {
         val appConfig = AppConfig()
-        val settings = UserSettings(
-            loadTrendingHeadlinesBy = LoadTrendingHeadlinesBy.Country(
-                alpha2Code = "km"
-            ),
-            newsApiKey = "apiKey",
-            headlinesPerRequest = 10,
-            usesDeveloperNewsApiKeys = true
-        )
+        val settings = userSettingsDefaultTestInstance
         val countriesRepository = mockk<CountriesRepository> {
             every { getCountries() } returns flowOf(countriesTestData)
         }

@@ -38,8 +38,14 @@ data class SourceApiResponse(
     val name: String?
 )
 
-fun NewsApiResponse.toHeadlinesPage(currentPage: Int, pageSize: Int): HeadlinesPage {
-    val articles: List<Article> = this.articles.mapNotNull { it.toDomain() }
+fun NewsApiResponse.toHeadlinesPage(
+    currentPage: Int,
+    pageSize: Int,
+    getLocalIdForArticle: () -> String
+): HeadlinesPage {
+    val articles: List<Article> = this.articles.mapNotNull {
+        it.toDomain(getLocalId = getLocalIdForArticle)
+    }
 
     val totalPages = if (totalResults > 0 && pageSize > 0)
         (totalResults + pageSize - 1) / pageSize
@@ -55,7 +61,9 @@ fun NewsApiResponse.toHeadlinesPage(currentPage: Int, pageSize: Int): HeadlinesP
 }
 
 
-fun ArticleApiResponse.toDomain(): Article? {
+fun ArticleApiResponse.toDomain(
+    getLocalId: () -> String
+): Article? {
     // Ensure all required non-nullable properties are present
     if (
         author == null ||
@@ -70,7 +78,7 @@ fun ArticleApiResponse.toDomain(): Article? {
     }
 
     return Article(
-        id = UUID.randomUUID().toString(),
+        id = getLocalId(),
         author = author,
         content = content,
         description = description,
@@ -84,4 +92,6 @@ fun ArticleApiResponse.toDomain(): Article? {
         )
     )
 }
+
+fun getLocalIdForArticle(): String = UUID.randomUUID().toString()
 

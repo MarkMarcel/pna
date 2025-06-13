@@ -1,14 +1,15 @@
 package com.marcel.pna.headlines.data
 
+import com.marcel.pna.AppConfig
 import com.marcel.pna.core.Logger
 import com.marcel.pna.core.Result
 import com.marcel.pna.headlines.data.models.NewsApiResponse
 import com.marcel.pna.headlines.data.models.NewsErrorApiResponse
+import com.marcel.pna.headlines.data.models.getLocalIdForArticle
 import com.marcel.pna.headlines.data.models.toHeadlinesPage
 import com.marcel.pna.headlines.domain.HeadlinesLoadError
 import com.marcel.pna.headlines.domain.HeadlinesPage
 import com.marcel.pna.headlines.domain.HeadlinesRequest
-import com.marcel.pna.headlines.trending.data.TrendingHeadlinesApi
 import com.marcel.pna.usersettings.domain.LoadTrendingHeadlinesBy
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.sync.Mutex
@@ -17,7 +18,8 @@ import retrofit2.HttpException
 import java.io.IOException
 
 class HeadlinesRemoteDataSource(
-    private val api: TrendingHeadlinesApi,
+    private val appConfigProvider: () -> AppConfig,
+    private val api: HeadlinesApi,
     private val logger: Logger,
     private val moshi: Moshi
 ) {
@@ -36,7 +38,7 @@ class HeadlinesRemoteDataSource(
             }
             previousRequest = request
         }
-
+        // Invalid request isn't an error but an exception, that's why it is here
         if (!request.isValid) {
             throw IllegalArgumentException("Invalid HeadlinesRequest.Trending, ensure values match LoadTrendingHeadlinesBy")
         }
@@ -45,17 +47,20 @@ class HeadlinesRemoteDataSource(
             delayMillisProvider = { attempt -> attempt * 1000L },
             shouldRetryProvider = { attempt, error -> attempt <= 3 && error is IOException }
         ) {
+            val pageSize = request.pageSize
+                ?: appConfigProvider().headlinesConfig.headlinesPerRequest
             when (request.loadTrendingHeadlinesBy) {
                 is LoadTrendingHeadlinesBy.Country -> {
                     val response: NewsApiResponse = api.getTrendingHeadlinesFromCountry(
                         apiKey = apiKey,
-                        country = request.countryAlpha2Code ?: "",
+                        country = request.loadTrendingHeadlinesBy.alpha2Code,
                         page = request.page,
-                        pageSize = request.pageSize
+                        pageSize = pageSize
                     )
                     response.toHeadlinesPage(
                         currentPage = request.page,
-                        pageSize = request.pageSize
+                        pageSize = pageSize,
+                        getLocalIdForArticle = ::getLocalIdForArticle
                     )
                 }
 

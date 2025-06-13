@@ -13,7 +13,7 @@ import com.marcel.pna.headlines.data.ArticleLocalDataSource
 import com.marcel.pna.headlines.data.DefaultHeadlinesRepository
 import com.marcel.pna.headlines.data.HeadlinesRemoteDataSource
 import com.marcel.pna.headlines.domain.HeadlinesRepository
-import com.marcel.pna.headlines.trending.data.TrendingHeadlinesApi
+import com.marcel.pna.headlines.data.HeadlinesApi
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -47,7 +47,14 @@ val HeadlinesModule = module {
 
     single { get<PNAMDatabase>().countriesRoomDao() }
 
-    single { HeadlinesRemoteDataSource(get(), get(), get()) }
+    single {
+        HeadlinesRemoteDataSource(
+            appConfigProvider = get(),
+            api = get(),
+            logger = get(),
+            moshi = get()
+        )
+    }
 
     single<HeadlinesRepository> {
         DefaultHeadlinesRepository(
@@ -80,6 +87,6 @@ val HeadlinesModule = module {
     }
 
     single {
-        get<Retrofit>(named(NEWS_API_RETROFIT)).create(TrendingHeadlinesApi::class.java)
+        get<Retrofit>(named(NEWS_API_RETROFIT)).create(HeadlinesApi::class.java)
     }
 }

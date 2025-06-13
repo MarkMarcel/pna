@@ -1,10 +1,10 @@
-package com.marcel.pna.headlines.trending.data
+package com.marcel.pna.headlines.data
 
 import com.marcel.pna.headlines.data.models.NewsApiResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface TrendingHeadlinesApi {
+interface HeadlinesApi {
     /**
      * @param country The 2-letter ISO 3166-1 code of the country you want to get headlines for (e.g., "us", "gb").
      */

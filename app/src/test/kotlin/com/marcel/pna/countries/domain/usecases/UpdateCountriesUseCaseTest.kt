@@ -126,13 +126,13 @@ class UpdateCountriesUseCaseTest : KoinTest {
                 backgroundDispatcher = get(named(BACKGROUND_DISPATCHER)),
                 countriesRepository = get()
             )
-            for ((exception, error) in errors) {
+            for ((exception, domainError) in errors) {
                 val result = useCase.run()
                 assertTrue { result is Result.Failure }
                 assertEquals(
-                    expected = Result.Failure(error),
+                    expected = Result.Failure(domainError),
                     actual = result,
-                    message = "Expected error $error for exception: ${exception::class.simpleName}"
+                    message = "Expected error $domainError for exception: ${exception::class.simpleName}"
                 )
                 coVerify(atLeast = 1) { restCountriesApiMock.getCountries() }
             }

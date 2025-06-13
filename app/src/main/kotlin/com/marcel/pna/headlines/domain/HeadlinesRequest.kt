@@ -4,7 +4,7 @@ import com.marcel.pna.usersettings.domain.LoadTrendingHeadlinesBy
 
 sealed class HeadlinesRequest(
     open val page: Int,
-    open val pageSize: Int,
+    open val pageSize: Int?,
 ) {
     data class Category(
         val category: Category,
@@ -13,17 +13,15 @@ sealed class HeadlinesRequest(
     ) : HeadlinesRequest(page, pageSize)
 
     data class Trending(
-        val countryAlpha2Code: String?,
         val loadTrendingHeadlinesBy: LoadTrendingHeadlinesBy,
-        val headlinesSourcesIds: Set<String>?,
-        override val page: Int,
-        override val pageSize: Int,
+        override val page: Int = 1,
+        override val pageSize: Int? = null,
     ) : HeadlinesRequest(page, pageSize) {
         val isValid: Boolean
             get() {
                 return when (loadTrendingHeadlinesBy) {
-                    is LoadTrendingHeadlinesBy.Country -> !countryAlpha2Code.isNullOrEmpty()
-                    is LoadTrendingHeadlinesBy.Sources -> !headlinesSourcesIds.isNullOrEmpty()
+                    is LoadTrendingHeadlinesBy.Country -> loadTrendingHeadlinesBy.alpha2Code.isNotBlank()
+                    is LoadTrendingHeadlinesBy.Sources -> loadTrendingHeadlinesBy.sourceIds.isNotEmpty()
                 }
             }
     }
