@@ -19,5 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PNA.M"
+rootProject.name = "pna"
 include(":app")
+include(":components")
+include(":tests")
