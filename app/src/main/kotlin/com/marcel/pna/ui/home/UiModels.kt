@@ -15,11 +15,11 @@ sealed class HomeScreenContent {
 sealed class HomeScreenIntent {
     data object ErrorHandled : HomeScreenIntent()
 
-    data object FirstPageLoad : HomeScreenIntent()
+    data object FirstPageHeadlinesLoad : HomeScreenIntent()
 
     data object Initialisation : HomeScreenIntent()
 
-    data object NextPageLoad : HomeScreenIntent()
+    data object NextPageHeadlinesLoad : HomeScreenIntent()
 
     data class SelectedHeadlineCategoryChanged(val index: Int) : HomeScreenIntent()
 }
@@ -66,6 +66,7 @@ sealed class HomeScreenUiState {
 
     data class Initialised(
         val content: HomeScreenContent,
+        val error: HomeScreenError?,
         val headlineCategories: List<ArticleCategory>,
         val isLoadingHeadlines: Boolean,
         val selectedCategoryIndex: Int,
@@ -84,6 +85,7 @@ fun HomeScreenModelState.toUiState(): HomeScreenUiState = when (this) {
         }
         HomeScreenUiState.Initialised(
             content = content,
+            error = error,
             headlineCategories = headlineCategories,
             isLoadingHeadlines = isLoadingHeadlines,
             selectedCategoryIndex = selectedCategoryIndex,

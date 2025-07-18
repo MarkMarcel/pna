@@ -89,7 +89,7 @@ class GetHeadlinesUseCaseTest : KoinTest {
     @Test
     fun `When HeadlinesApi fails, Then corresponding error returned`() = runTest {
         declareTestDispatchers(this)
-        val errors = listOf(
+        val errorPairs = listOf(
             HttpException(
                 Response.error<NewsApiResponse>(
                     400,
@@ -167,7 +167,7 @@ class GetHeadlinesUseCaseTest : KoinTest {
                     page = any(),
                     pageSize = any()
                 )
-            } throwsMany errors.map { error -> error.first }
+            } throwsMany errorPairs.map { it.first }
         }
         declare<HeadlinesApi> { headlinesApiMock }
 
@@ -175,7 +175,7 @@ class GetHeadlinesUseCaseTest : KoinTest {
             backgroundDispatcher = get(named(BACKGROUND_DISPATCHER)),
             headlinesRepository = get(),
         )
-        for ((exception, domainError) in errors) {
+        for ((exception, domainError) in errorPairs) {
             val result = useCase.run(request)
             assertTrue { result is Result.Failure }
             assertEquals(

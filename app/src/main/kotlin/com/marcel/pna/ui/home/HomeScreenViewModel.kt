@@ -43,7 +43,7 @@ class HomeScreenViewModel(
                 onErrorHandled()
             }
 
-            is HomeScreenIntent.FirstPageLoad -> {
+            is HomeScreenIntent.FirstPageHeadlinesLoad -> {
                 loadHeadlinesFirstPage()
             }
 
@@ -51,7 +51,7 @@ class HomeScreenViewModel(
                 observeUserSettings()
             }
 
-            is HomeScreenIntent.NextPageLoad -> {
+            is HomeScreenIntent.NextPageHeadlinesLoad -> {
                 loadHeadlinesNextPage()
             }
 
@@ -134,7 +134,7 @@ class HomeScreenViewModel(
                         loadTrendingHeadlinesBy = userSettings.loadTrendingHeadlinesBy
                     )
                 }
-                onIntent(HomeScreenIntent.FirstPageLoad)
+                onIntent(HomeScreenIntent.FirstPageHeadlinesLoad)
             }
         }
     }

@@ -108,7 +108,7 @@ class UpdateCountriesUseCaseTest : KoinTest {
             val response = Response.error<List<RestCountryApiResponse>>(500, errorBody)
             val ioException = IOException("Network issue")
             val httpException = HttpException(response)
-            val errors = listOf(
+            val errorPairs = listOf(
                 httpException to CountryError.Server,
                 ioException to CountryError.Network // Must be last due to retries in datasource
             )
@@ -116,7 +116,7 @@ class UpdateCountriesUseCaseTest : KoinTest {
             // Mock data apis. CountriesApi mocked such that it throws the exceptions in [errors] on
             // subsequent calls in order
             val restCountriesApiMock = mockk<RestCountriesApi> {
-                coEvery { getCountries() } throwsMany errors.map { error -> error.first }
+                coEvery { getCountries() } throwsMany errorPairs.map { it.first }
             }
             val countriesRoomDaoMock = mockk<CountriesRoomDao>(relaxed = true)
             declare<RestCountriesApi> { restCountriesApiMock }
@@ -126,7 +126,7 @@ class UpdateCountriesUseCaseTest : KoinTest {
                 backgroundDispatcher = get(named(BACKGROUND_DISPATCHER)),
                 countriesRepository = get()
             )
-            for ((exception, domainError) in errors) {
+            for ((exception, domainError) in errorPairs) {
                 val result = useCase.run()
                 assertTrue { result is Result.Failure }
                 assertEquals(
