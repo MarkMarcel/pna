@@ -81,7 +81,7 @@ class HomeScreenViewModelTest {
                 actual = error,
                 message = "Expected error $screenError for load error: $loadError"
             )
-            //coVerify(exactly = 1) { headlinesRepository.getHeadlines(any()) }
+            coVerify(exactly = 1) { headlinesRepository.getHeadlines(any()) }
         }
     }
 }
