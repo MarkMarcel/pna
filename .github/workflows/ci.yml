@@ -10,12 +10,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Setup JDK 20
+    - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: '21'
-        distribution: 'jetbrains'
-        java-package: 'jre'
+        java-version: '21.0.8+9'
+        distribution: 'temurin'
         cache: 'gradle'
 
     - name: Grant execute permission for gradlew
