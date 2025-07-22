@@ -1,3 +1,32 @@
 <resources>
-    <string name="app_name">PNA.M</string>
+    <string name="app_logo_content_description">App logo</string>
+    <string name="app_name" translatable="false">PNA.M</string>
+    <string name="back_content_description">Back</string>
+    <string name="business_label">Business</string>
+    <string name="components_app_name" translatable="false">PNA.M components</string>
+    <string name="country_label">Country</string>
+    <string name="entertainment_label">Entertainment</string>
+    <string name="enter_your_api_key_prompt">Enter your %1$s key</string>
+    <string name="generate_news_api_key_prompt">Get your %1$s API key here</string>
+    <string name="general_label">General</string>
+    <string name="headlines_heading">Headlines</string>
+    <string name="health_label">Health</string>
+    <string name="hide_news_api_key_content_description">Hide your %1$s key</string>
+    <string name="load_trending_headlines_by_label">Load trending headlines by</string>
+    <string name="network_error">Cannot connect to the network</string>
+    <string name="news_api_access_error_heading">Your %1$s access restricted</string>
+    <string name="news_api_access_error_prompt">Your %1$s key is missing, wrong or disabled</string>
+    <string name="news_api_service" translatable="false">News API</string>
+    <string name="save_key_label">Save key</string>
+    <string name="science_label">Science</string>
+    <string name="select_trending_headlines_country_prompt">To load headlines by country, you need to select a country</string>
+    <string name="settings_btn">Settings</string>
+    <string name="show_news_api_key_content_description">Show your %1$s key</string>
+    <string name="sources_label">Sources</string>
+    <string name="sports_label">Sports</string>
+    <string name="technology_label">Technology</string>
+    <string name="trending_label">Trending</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="update_countries_label">Update countries</string>
+    <string name="user_settings_screen_title">User settings</string>
 </resources>

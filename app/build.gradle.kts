@@ -26,7 +26,8 @@ android {
             applicationIdSuffix = ".debug"
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -34,11 +35,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "21"
+    }
+    kotlin {
+        jvmToolchain(21) // MockK requires this
     }
     packaging {
         resources {
@@ -50,7 +54,7 @@ android {
         create("app") {
             dimension = "appType"
         }
-        create("components") {
+        create("componentsdemo") {
             dimension = "appType"
             applicationIdSuffix = ".components"
             versionNameSuffix = "- components"
@@ -59,6 +63,7 @@ android {
 }
 
 dependencies {
+    // APP
     // AndroidX
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
@@ -66,8 +71,34 @@ dependencies {
     // Compose
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.material3)
+    implementation(libs.compose.navigation)
     implementation(libs.compose.preview)
     debugImplementation(libs.compose.preview.debug)
+    // Data
+    implementation(libs.datastore.preferences)
+    implementation(libs.room)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
+    // Dependency Injection
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.compose)
+    implementation(libs.koin.compose.navigation)
+    // Network
+    implementation(libs.okhttp.logger)
+    implementation(libs.moshi)
+    ksp(libs.moshi.codegen)
+    implementation(libs.moshi.converter)
+    implementation(libs.retrofit)
     // PNA.M Components
     implementation(project(":components"))
+
+    // TESTING
+    // Coroutines
+    testImplementation(libs.corountines.test)
+    // JUnit
+    testImplementation(libs.junit)
+    // Koin
+    testImplementation(libs.koin.test)
+    // MockK
+    testImplementation(libs.mockK)
 }

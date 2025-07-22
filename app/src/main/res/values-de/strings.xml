@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_logo_content_description">App-Logo</string>
+    <string name="app_name" translatable="false">PNA.M</string>
+    <string name="back_content_description">Zurück</string>
+    <string name="business_label">Wirtschaft</string>
+    <string name="components_app_name" translatable="false">PNA.M components</string>
+    <string name="country_label">Land</string>
+    <string name="entertainment_label">Unterhaltung</string>
+    <string name="enter_your_api_key_prompt">Geben Sie Ihren %1$s-Schlüssel ein</string>
+    <string name="generate_news_api_key_prompt">Hier %1$s API-Schlüssel erhalten</string>
+    <string name="general_label">Allgemein</string>
+    <string name="headlines_heading">Schlagzeilen</string>
+    <string name="health_label">Gesundheit</string>
+    <string name="hide_news_api_key_content_description">%1$s-Schlüssel ausblenden</string>
+    <string name="load_trending_headlines_by_label">Trend-Schlagzeilen laden nach</string>
+    <string name="network_error">Keine Netzwerkverbindung möglich</string>
+    <string name="news_api_access_error_heading">%1$s-Zugriff eingeschränkt</string>
+    <string name="news_api_access_error_prompt">Ihr %1$s-Schlüssel fehlt, ist falsch oder deaktiviert</string>
+    <string name="news_api_service" translatable="false">News API</string>
+    <string name="save_key_label">Schlüssel speichern</string>
+    <string name="science_label">Wissenschaft</string>
+    <string name="select_trending_headlines_country_prompt">Um Schlagzeilen nach Land zu laden, wählen Sie bitte ein Land aus</string>
+    <string name="settings_btn">Einstellungen</string>
+    <string name="show_news_api_key_content_description">%1$s-Schlüssel anzeigen</string>
+    <string name="sources_label">Quellen</string>
+    <string name="sports_label">Sport</string>
+    <string name="technology_label">Technologie</string>
+    <string name="trending_label">Im Trend</string>
+    <string name="unknown_error">Unbekannter Fehler</string>
+    <string name="update_countries_label">Länder aktualisieren</string>
+    <string name="user_settings_screen_title">Benutzereinstellungen</string>
+</resources>
