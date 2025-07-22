@@ -10,10 +10,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+        token: ${{ secrets.CI_ACCESS_TOKEN }}
     - name: Setup JDK
       uses: actions/setup-java@v4
       with:
-        java-version: '21.0.8+9'
+        java-version: '21.0.8+9.0.LTS'
         distribution: 'temurin'
         cache: 'gradle'
 
