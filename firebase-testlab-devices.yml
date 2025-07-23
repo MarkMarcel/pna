@@ -1,0 +1,9 @@
+android-medium-phone:
+  type: instrumentation
+  app: app/build/outputs/apk/debug/app-debug.apk
+  test: app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+  device:
+    - model: 'Medium Phone, 6.4in/16cm (Arm)'
+      version: 35
+      locale: 'en'
+      orientation: portrait
