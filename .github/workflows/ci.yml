@@ -70,15 +70,27 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build App with Gradle
-        run: ./gradlew build -x lint --no-daemon --stacktrace
+      - name: Build Component APK
+        run: ./gradlew :components:assembleDebug --no-daemon --stacktrace
 
-      - name: Build Android Test APK
-        run: ./gradlew assembleAndroidTest -x lint --no-daemon --stacktrace
+      - name: Build Test APK
+        run: ./gradlew :tests:assembleDebugAndroidTest --no-daemon --stacktrace
+
+      - name: Verify APK outputs
+        run: |
+          echo "App APK:"
+          find components/build/outputs/apk/debug -name "*.apk"
+          echo "Test APK:"
+          find tests/build/outputs/apk/androidTest/debug -name "*.apk"
 
       - name: Run Android tests on Firebase Test Lab
         uses: asadmansr/Firebase-Test-Lab-Action@v1.0
         with:
-          arg-spec: 'firebase-testlab-devices.yml:android-medium-phone'
+          arg-spec: >
+            gcloud firebase test android run
+            --type instrumentation
+            --app components/build/outputs/apk/debug/components-debug.apk
+            --test tests/build/outputs/apk/androidTest/debug/tests-debug-androidTest.apk
+            --device model=MediumPhone.arm,version=35,locale=en,orientation=portrait
         env:
           SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
